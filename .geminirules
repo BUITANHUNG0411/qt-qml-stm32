@@ -1,0 +1,22 @@
+# Antigravity Native Rules (.geminirules)
+
+> **AI Context**: Native configuration and behavior overrides for the Antigravity IDE agent.
+
+## 1. Behavior & Mindset
+- **Vibe Coding Protocol**: Operate autonomously but predictably. Do not make massive undocumented architectural shifts. Small, atomic, testable commits are required.
+- **No Hallucinations**: Strictly use Qt 6.5+ APIs. Do not invent QML components or C++ macros.
+- **Language**: All code, comments, variables, and documentation written directly into project files MUST be in English. However, any markdown outputs generated for the user's review (like implementation plans, walkthroughs, or reports) that are NOT saved directly into the project codebase MUST be in Vietnamese.
+- **Walkthrough Structure**: When generating a walkthrough, you MUST include a specific section at the end of "Những thay đổi đã thực hiện" detailing the UI changes and exactly how the user can verify/notice them visually.
+## 2. Hard Architectural Boundaries
+> [!WARNING]
+> Any violation of these rules will result in immediate task failure.
+- **Rule 1**: QML files (`.qml`) shall contain NO `function()`, NO `if/else` logic, and NO state mutation.
+- **Rule 2**: C++ ViewModels must emit `NOTIFY` signals for every `Q_PROPERTY` mutation.
+- **Rule 3**: Use `CMake` exclusively via `qt_standard_project_setup(REQUIRES 6.8)`. No `qmake`.
+
+## 3. Action Execution
+- **Pre-flight Check**: Before modifying code, read `AGENTS.md` to map dependencies.
+- **Post-flight Check**: Always run CMake configure and `ctest` (or manual test build) before confirming a solution.
+
+## 4. Aesthetic Mandate
+- The UI MUST be visually stunning: Cyberpunk-lite, neon accents, dark theme (`#0B0C10`), smooth `Transitions`, and `NumberAnimations`. See `docs/ui_ux_guidelines.md`.

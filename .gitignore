@@ -1,0 +1,31 @@
+# Build artifacts
+build/
+*.o
+*.obj
+*.exe
+*.dll
+*.so
+*.dylib
+CMakeCache.txt
+CMakeFiles/
+CMakeScripts/
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+.qt/
+.qtc_clangd/
+
+# QtCreator
+*.user
+*.user.*
+.qtcreator/
+
+# Media
+*.mp4
+*.avi
+*.mkv
+
+# OS generated
+.DS_Store
+Thumbs.db

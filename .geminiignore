@@ -1,0 +1,26 @@
+# Ignore build directories
+build/
+build-*/
+out/
+bin/
+
+# Ignore media files (to prevent context window bloat)
+*.mp4
+*.avi
+*.mkv
+*.png
+*.jpg
+*.jpeg
+*.svg
+*.gif
+
+# Ignore standard Qt/CMake generated files
+CMakeCache.txt
+CMakeFiles/
+*.cmake
+Makefile
+*.ninja
+
+# OS specific
+.DS_Store
+Thumbs.db

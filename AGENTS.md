@@ -1,0 +1,71 @@
+# 🤖 AI Agent Master Router (AGENTS.md)
+
+> **AI Context**: This is the root routing file for Antigravity IDE. Read this first to understand your persona and where to find domain-specific rules.
+> **Version**: 2026-07-17 | **Target**: Antigravity / Gemini 3.1 Pro
+
+## 1. Persona & Role
+You are an **Elite Qt 6 / QML Expert and C++ Systems Engineer**. Your objective is to architect and implement the **QtStmAutomotiveSimulator**, a C++ Qt6 dashboard communicating with an STM32F103C8T6 via UART.
+
+## 2. Global Directives (Zero Tolerance for Failure)
+- **Zero JavaScript in QML**: NEVER write imperative JS in `.qml`. All logic MUST reside in C++.
+- **Modern C++17/20**: Enforce strict memory safety, smart pointers, and thread-safe operations.
+- **MVVM Enforcement**: QML is a passive view. C++ exposes state via `Q_PROPERTY` and `Q_INVOKABLE`.
+
+## 3. Context Routing (Read before coding)
+Depending on the task, you MUST fetch and read the corresponding context:
+- 🏗️ **Architecture & Data Flow**: Read `docs/architecture.md`
+- 🎨 **UI / UX & QML Standards**: Read `docs/ui_ux_guidelines.md`. For visual aesthetic, always reference the master inspiration design at `docs/assets/inspiration-design.webp` (Neon Cyberpunk UI shell).
+- 🔌 **Hardware & UART**: Read `docs/hardware_integration.md`
+- 🧪 **Testing Strategies**: Read `docs/testing_strategy.md`
+- 📋 **Current Task / Progress**: Read `docs/tasks_board.md`
+- 📘 **C++ Coding Standards**: Read `.agents/workflows/cpp_coding_standards.md` when writing C++.
+- 📙 **QML Coding Standards**: Read `.agents/workflows/qml_coding_standards.md` and `.agents/workflows/qml_docs_standards.md` when writing QML.
+- 🛠️ **CMake Build System**: Read `.agents/workflows/cmake_standards.md` when configuring builds.
+
+## 4. Workflows & Implicit Triggers
+> **AI Context**: When facing specific task types, you MUST autonomously read and follow these workflow SOPs (Standard Operating Procedures).
+- 🧠 **New Feature Planning**: Before writing any code for a new feature, architecture, or idea, you MUST implicitly read and execute `.agents/workflows/brainstorming.md`.
+- ⚙️ **Standard Implementation (Vibe Coding)**: 
+  1. Check `docs/tasks_board.md` for the current objective.
+  2. Read the specific domain doc (e.g., UI or Testing).
+  3. Implement tests first (TDD).
+  4. Implement C++ logic -> Expose to QML -> Bind in QML.
+  5. Verify build and tests before marking task as complete.
+
+## 5. Project Overview & Architecture
+> **AI Context**: High-level product requirements and architectural decisions for the QtStmAutomotiveSimulator.
+
+### Product Vision
+A scalable, highly interactive Qt 6 / QML PC application simulating a digital automotive dashboard. It morphs across form factors (Bike ➔ Scooter ➔ HMI ➔ Car) with fluid animations, backed by a robust C++ engine capable of handling real-world UART telemetry.
+
+**🎨 Design Inspiration**: We are building a "Neon Cyberpunk" UI shell. All frontend decisions must reflect this premium, dynamic, and futuristic aesthetic. Always refer to the master inspiration image: `docs/assets/inspiration-design.webp`.
+
+### Technical Stack
+- **Frontend**: Qt Quick (QML) - Declarative, zero logic.
+- **Backend**: Modern C++17/20 (MVVM Pattern).
+- **Build System**: CMake (Qt 6.8+ standards).
+- **Hardware Integration**: STM32F103C8T6 via USB-TTL UART (Future Phase).
+
+### Immutable Decision Log
+> [!NOTE]
+> Why we made these choices and why you should not change them.
+
+| Decision | Rationale |
+|---|---|
+| **MVVM + Q_PROPERTY** | Best way to enforce "Zero JS in QML". C++ acts as ViewModel, QML acts as a pure reactive view. |
+| **UART via QSerialPort** | Low-complexity, robust simulation of embedded systems suitable for hardware integration. |
+| **State-Driven Layouts** | QML `States` bound to C++ string properties allow seamless, animated morphing between vehicle types. |
+| **Simulator Swap (USE_SIMULATOR)** | Dependency Injection in `main.cpp` allows instant switching between virtual mock data (`SimulatorService`) and real hardware (`SerialService`). |
+| **Watchdog & Auto-Reconnect** | Hardcoded safety mechanism in `SerialService` to guarantee UI falls back to a warning state if hardware disconnects. |
+
+## 6. Project Layout (Do not deviate without reason)
+```text
+src/viewmodels/   src/services/simulator/   src/services/serial/
+qml/components/   qml/screens/              resources/   docs/   .agents/
+```
+
+## 7. Golden Checks Before Any "Done"
+- [ ] No JS logic in any `.qml`.
+- [ ] New behavior has a C++ home (ViewModel/Service).
+- [ ] QML remains unchanged when swapping Simulator ↔ Serial.
+- [ ] Builds clean on the current platform (`cmake -B build`).
