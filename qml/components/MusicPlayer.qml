@@ -200,13 +200,26 @@ Item {
                     Item { Layout.fillWidth: true } // Spacer
 
                     // Prev Button
-                    Text {
-                        text: "⏮"
-                        font.pixelSize: 26
-                        color: prevMouse.pressed ? Theme.accentCyan : Theme.textPrimary
+                    Item {
+                        width: 26
+                        height: 26
                         scale: prevMouse.pressed ? 0.9 : 1.0
                         Behavior on scale { NumberAnimation { duration: 100 } }
-                        Behavior on color { ColorAnimation { duration: 100 } }
+                        
+                        Image {
+                            id: prevIcon
+                            anchors.fill: parent
+                            source: "../../resources/icons/prev.svg"
+                            sourceSize: Qt.size(26, 26)
+                            visible: false
+                        }
+                        MultiEffect {
+                            anchors.fill: prevIcon
+                            source: prevIcon
+                            colorization: 1.0
+                            colorizationColor: prevMouse.pressed ? Theme.accentCyan : Theme.textPrimary
+                            Behavior on colorizationColor { ColorAnimation { duration: 100 } }
+                        }
                         MouseArea { id: prevMouse; anchors.fill: parent; onClicked: pathView.decrementCurrentIndex() }
                     }
 
@@ -219,27 +232,50 @@ Item {
                         border.color: Theme.accentCyan
                         border.width: 2
                         scale: playMouse.pressed ? 0.9 : 1.0
-                        
-                        Text {
-                            anchors.centerIn: parent
-                            text: "⏸"
-                            font.pixelSize: 20
-                            color: playMouse.pressed ? Theme.backgroundDeepSpace : Theme.accentCyan
-                        }
-                        
                         Behavior on scale { NumberAnimation { duration: 100 } }
                         Behavior on color { ColorAnimation { duration: 100 } }
+                        
+                        Image {
+                            id: playIcon
+                            width: 20
+                            height: 20
+                            anchors.centerIn: parent
+                            // Mock toggling icon, just use pause for now
+                            source: "../../resources/icons/pause.svg" 
+                            sourceSize: Qt.size(20, 20)
+                            visible: false
+                        }
+                        MultiEffect {
+                            anchors.fill: playIcon
+                            source: playIcon
+                            colorization: 1.0
+                            colorizationColor: playMouse.pressed ? Theme.backgroundDeepSpace : Theme.accentCyan
+                            Behavior on colorizationColor { ColorAnimation { duration: 100 } }
+                        }
                         MouseArea { id: playMouse; anchors.fill: parent }
                     }
 
                     // Next Button
-                    Text {
-                        text: "⏭"
-                        font.pixelSize: 26
-                        color: nextMouse.pressed ? Theme.accentCyan : Theme.textPrimary
+                    Item {
+                        width: 26
+                        height: 26
                         scale: nextMouse.pressed ? 0.9 : 1.0
                         Behavior on scale { NumberAnimation { duration: 100 } }
-                        Behavior on color { ColorAnimation { duration: 100 } }
+                        
+                        Image {
+                            id: nextIcon
+                            anchors.fill: parent
+                            source: "../../resources/icons/next.svg"
+                            sourceSize: Qt.size(26, 26)
+                            visible: false
+                        }
+                        MultiEffect {
+                            anchors.fill: nextIcon
+                            source: nextIcon
+                            colorization: 1.0
+                            colorizationColor: nextMouse.pressed ? Theme.accentCyan : Theme.textPrimary
+                            Behavior on colorizationColor { ColorAnimation { duration: 100 } }
+                        }
                         MouseArea { id: nextMouse; anchors.fill: parent; onClicked: pathView.incrementCurrentIndex() }
                     }
 

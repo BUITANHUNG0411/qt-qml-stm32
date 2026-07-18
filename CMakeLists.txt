@@ -43,6 +43,11 @@ qt_add_qml_module(${PROJECT_NAME}
         qml/components/NeonTickGauge.qml
         qml/components/MusicPlayer.qml
         qml/screens/DashboardScreen.qml
+    RESOURCES
+        resources/icons/play.svg
+        resources/icons/pause.svg
+        resources/icons/next.svg
+        resources/icons/prev.svg
     SOURCES
         src/viewmodels/VehicleStatusViewModel.h
         src/viewmodels/VehicleStatusViewModel.cpp

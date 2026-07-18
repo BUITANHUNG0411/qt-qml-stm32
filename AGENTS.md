@@ -74,3 +74,4 @@ qml/components/   qml/screens/              resources/   docs/   .agents/
 - [ ] New behavior has a C++ home (ViewModel/Service).
 - [ ] QML remains unchanged when swapping Simulator ↔ Serial.
 - [ ] Builds clean on the current platform (`cmake -B build`).
+- [ ] Luôn luôn thực hiện `git commit` và `git push` sau mỗi khi hoàn thành một thay đổi nhỏ (vibe coding workflow).
