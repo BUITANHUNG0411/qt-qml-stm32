@@ -27,6 +27,7 @@ Item {
     // Main 3-Panel Layout
     RowLayout {
         anchors.centerIn: parent
+        anchors.verticalCenterOffset: -30 // Đưa cụm đồng hồ lên 30px để khớp hoàn hảo với phần lõm của khung
         width: parent.width * 0.85
         height: 400
         spacing: 60

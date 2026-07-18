@@ -1,7 +1,7 @@
 # 🤖 AI Agent Master Router (AGENTS.md)
 
 > **AI Context**: This is the root routing file for Antigravity IDE. Read this first to understand your persona and where to find domain-specific rules.
-> **Version**: 2026-07-17 | **Target**: Antigravity / Gemini 3.1 Pro
+> **Version**: 2026-07-18 | **Target**: Antigravity / Gemini 3.1 Pro
 
 ## 1. Persona & Role
 You are an **Elite Qt 6 / QML Expert and C++ Systems Engineer**. Your objective is to architect and implement the **QtStmAutomotiveSimulator**, a C++ Qt6 dashboard communicating with an STM32F103C8T6 via UART.
@@ -57,7 +57,7 @@ A scalable, highly interactive Qt 6 / QML PC application simulating a digital au
 | **State-Driven Layouts** | QML `States` bound to C++ string properties allow seamless, animated morphing between vehicle types. |
 | **Simulator Swap (USE_SIMULATOR)** | Dependency Injection in `main.cpp` allows instant switching between virtual mock data (`SimulatorService`) and real hardware (`SerialService`). |
 | **Watchdog & Auto-Reconnect** | Hardcoded safety mechanism in `SerialService` to guarantee UI falls back to a warning state if hardware disconnects. |
-| **Monolithic Glass Frame** | Application runs as a Frameless Transparent Window (`Qt.FramelessWindowHint`). A rounded `Rectangle` (`radius: 40`) acts as the custom hardware bezel to simulate a modern physical dashboard. |
+| **Double Arch Glass Frame** | Application runs as a Frameless Transparent Window (`Qt.FramelessWindowHint`). A `Shape` with a precise `PathSvg` acts as the custom hardware bezel, creating a "Double Arch / Binocular" physical dashboard silhouette. |
 | **Tick-Based Illumination** | Gauge tracking relies on dynamic illumination of discrete ticks (`isIlluminated`) rather than continuous solid arcs, maximizing the "Neon Cyberpunk" digital aesthetic without JS overhead. |
 
 ## 6. Project Layout (Do not deviate without reason)
