@@ -55,9 +55,10 @@ A scalable, highly interactive Qt 6 / QML PC application simulating a digital au
 | **MVVM + Q_PROPERTY** | Best way to enforce "Zero JS in QML". C++ acts as ViewModel, QML acts as a pure reactive view. |
 | **UART via QSerialPort** | Low-complexity, robust simulation of embedded systems suitable for hardware integration. |
 | **State-Driven Layouts** | QML `States` bound to C++ string properties allow seamless, animated morphing between vehicle types. |
-| **Simulator Swap (USE_SIMULATOR)** | Dependency Injection in `main.cpp` allows instant switching between virtual mock data (`SimulatorService`) and real hardware (`SerialService`). |
+| **Runtime Hardware Fallback** | Dependency Injection in `main.cpp` attempts to open `SerialService` first. If hardware is disconnected, it instantly falls back to `SimulatorService` at runtime, ensuring UI continuity. |
 | **Watchdog & Auto-Reconnect** | Hardcoded safety mechanism in `SerialService` to guarantee UI falls back to a warning state if hardware disconnects. |
 | **Double Arch Glass Frame** | Application runs as a Frameless Transparent Window (`Qt.FramelessWindowHint`). A `Shape` with a precise `PathSvg` acts as the custom hardware bezel, creating a "Double Arch / Binocular" physical dashboard silhouette. |
+| **Glassmorphism Aesthetic** | Central panels use translucent backgrounds with subtle diagonal gradients (`#2C353F` tinted base) and fade-out masks to simulate frosted glass and cyberpunk neon lighting. |
 | **Tick-Based Illumination** | Gauge tracking relies on dynamic illumination of discrete ticks (`isIlluminated`) rather than continuous solid arcs, maximizing the "Neon Cyberpunk" digital aesthetic without JS overhead. |
 
 ## 6. Project Layout (Do not deviate without reason)
