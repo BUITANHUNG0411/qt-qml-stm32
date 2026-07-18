@@ -62,6 +62,8 @@ A scalable, highly interactive Qt 6 / QML PC application simulating a digital au
 | **Tick-Based Illumination** | Gauge tracking relies on dynamic illumination of discrete ticks (`isIlluminated`) rather than continuous solid arcs, maximizing the "Neon Cyberpunk" digital aesthetic without JS overhead. |
 | **3D Cover Flow (PathView)** | Using native `PathView` with `PathAttribute` for performant, Zero-JS 3D music carousel instead of heavy 3D engines or complex JS math. |
 | **Absolute Bezel Alignment** | `DashboardScreen` uses absolute coordinates (avoiding `RowLayout`) to lock gauge centers precisely to the `PathSvg` Double Arch bezels, preventing UI overflow. |
+| **Async Media Scanning** | Use `QThread` with `QDirIterator` (Worker Object pattern) in C++ to scan OS directories without blocking the QML Render Thread. |
+| **C++ Audio Playback** | `QMediaPlayer` is managed entirely within `MusicPlayerViewModel`. Playback state and progress are exposed to QML via `Q_PROPERTY` to ensure Zero JS. |
 
 ## 6. Project Layout (Do not deviate without reason)
 ```text
@@ -74,4 +76,4 @@ qml/components/   qml/screens/              resources/   docs/   .agents/
 - [ ] New behavior has a C++ home (ViewModel/Service).
 - [ ] QML remains unchanged when swapping Simulator ↔ Serial.
 - [ ] Builds clean on the current platform (`cmake -B build`).
-- [ ] Luôn luôn thực hiện `git commit` và `git push` sau mỗi khi hoàn thành một thay đổi nhỏ (vibe coding workflow).
+- [ ] Always execute `git commit` and `git push` after completing any small change (vibe coding workflow).

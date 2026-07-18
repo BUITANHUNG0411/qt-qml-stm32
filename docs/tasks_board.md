@@ -60,3 +60,6 @@
 - [x] Fix CMake module linking by adding `MusicPlayer.qml` to `QML_FILES`.
 - [x] Fix `DashboardScreen` layout bugs (replaced `RowLayout` with absolute coordinates to perfectly align gauges inside Double Arch bezels).
 - [x] Fix SVG syntax typo in `Main.qml` Double Arch path.
+- [x] Architect and implement `MusicScanner` C++ worker using `QThread` for non-blocking OS directory scanning.
+- [x] Implement `MusicPlayerViewModel` (MVVM) inheriting `QAbstractListModel` with `QMediaPlayer` integration.
+- [x] Bind `MusicPlayer.qml` directly to `MusicViewModel` exposing `progress`, `isPlaying`, and playback slots.
