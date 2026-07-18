@@ -14,7 +14,7 @@ Item {
         id: topBar
         anchors.top: parent.top
         anchors.horizontalCenter: parent.horizontalCenter
-        anchors.topMargin: 40
+        anchors.topMargin: 70
         spacing: 40
 
         // Mock Icons (Cyberpunk style)
@@ -37,15 +37,15 @@ Item {
             Layout.preferredWidth: 350
             Layout.fillHeight: true
 
-            CircularGauge {
+            NeonTickGauge {
                 anchors.centerIn: parent
                 width: 350
                 height: 350
                 value: vm.speed
-                maxValue: 160 // 160 km/h max
+                maxValue: 160
                 isWarning: vm.isWarning
-                tickStep: 10
-                majorTickStep: 20
+                tickCount: 80
+                majorTickInterval: 10
             }
 
             Column {
@@ -80,22 +80,41 @@ Item {
                 anchors.centerIn: parent
                 spacing: 25
 
-                // Mock Album Art
-                Rectangle {
+                // Mock Album Art (Cyberpunk Style)
+                Item {
                     width: 200; height: 200
-                    color: "#2C353F"
-                    radius: 12
                     anchors.horizontalCenter: parent.horizontalCenter
-                    border.width: 1
-                    border.color: Qt.rgba(Theme.textSecondary.r, Theme.textSecondary.g, Theme.textSecondary.b, 0.5)
+
+                    // Album art background (Neon Gradient)
+                    Rectangle {
+                        anchors.fill: parent
+                        radius: 12
+                        gradient: Gradient {
+                            GradientStop { position: 0.0; color: "#FF0055" } // Neon Magenta
+                            GradientStop { position: 1.0; color: "#4A00E0" } // Deep Purple
+                        }
+                        opacity: 0.8
+                    }
+
+                    // Fade out mask at the bottom for smooth blending
+                    Rectangle {
+                        anchors.fill: parent
+                        radius: 12
+                        gradient: Gradient {
+                            GradientStop { position: 0.4; color: "transparent" }
+                            GradientStop { position: 1.0; color: Theme.backgroundDeepSpace } // Fades into background
+                        }
+                    }
                     
                     Text {
                         anchors.centerIn: parent
-                        text: "MUSIC"
-                        color: Theme.textSecondary
-                        font.family: Theme.fontDisplay
-                        font.pixelSize: 20
-                        font.letterSpacing: 4
+                        text: "PLAYING"
+                        color: "white"
+                        font.family: Theme.fontMain
+                        font.pixelSize: 16
+                        font.letterSpacing: 6
+                        font.bold: true
+                        opacity: 0.8
                     }
                 }
 
@@ -123,15 +142,16 @@ Item {
             Layout.preferredWidth: 350
             Layout.fillHeight: true
 
-            CircularGauge {
+            NeonTickGauge {
                 anchors.centerIn: parent
                 width: 350
                 height: 350
                 value: vm.rpm
                 maxValue: 6000
                 isWarning: vm.isWarning
-                tickStep: 500
-                majorTickStep: 1000
+                tickCount: 60
+                majorTickInterval: 10
+                redlineValue: 5000
             }
 
             Column {
@@ -162,7 +182,7 @@ Item {
     RowLayout {
         anchors.bottom: parent.bottom
         anchors.horizontalCenter: parent.horizontalCenter
-        anchors.bottomMargin: 40
+        anchors.bottomMargin: 80
         width: parent.width * 0.75
         
         // Left: Range

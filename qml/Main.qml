@@ -33,31 +33,39 @@ Window {
             layer.enabled: true
             layer.samples: 8 // Chống răng cưa (anti-aliasing) chất lượng cao
 
+            // Nền chính của khung
             ShapePath {
                 fillColor: Theme.backgroundDeepSpace
-                strokeColor: Qt.rgba(Theme.textSecondary.r, Theme.textSecondary.g, Theme.textSecondary.b, 0.3)
+                strokeColor: Qt.rgba(Theme.textSecondary.r, Theme.textSecondary.g, Theme.textSecondary.b, 0.5)
                 strokeWidth: 2
 
-                // Đường dẫn SVG (PathSvg) tạo hình "Binocular" / "Double Arch" (Đã căn chỉnh hoàn hảo theo Layout):
-                // 1. M 270 0: Đỉnh đồng hồ trái (căn giữa trục X=270 của Gauge)
-                // 2. C 380 0, 450 30, 510 30: Lượn mượt xuống phần hõm trên (Y=30 để không che TopBar)
-                // 3. L 650 30: Đường ngang hõm trên
-                // 4. C 710 30, 780 0, 890 0: Lượn mượt lên đỉnh đồng hồ phải (X=890)
-                // 5. A 250 380 0 0 1 890 760: Cung Ellipse phải ôm trọn đồng hồ phải xuống tận đáy
-                // 6. C 780 760, 710 730, 650 730: Lượn mượt lên phần hõm dưới (Y=730 bọc trọn BottomBar)
-                // 7. L 510 730: Đường ngang hõm dưới
-                // 8. C 450 730, 380 760, 270 760: Lượn mượt xuống đáy đồng hồ trái
-                // 9. A 250 380 0 0 1 270 0 Z: Cung Ellipse trái ôm trọn đồng hồ trái và khép kín
+                // Đường dẫn SVG tinh chỉnh cho mượt hoàn hảo bằng Cubic Bezier (C/S)
                 PathSvg {
                     path: "M 270 0 " +
-                          "C 380 0, 450 30, 510 30 " +
-                          "L 650 30 " +
-                          "C 710 30, 780 0, 890 0 " +
+                          "C 420 0, 480 50, 580 50 " +
+                          "S 740 0, 890 0 " +
                           "A 250 380 0 0 1 890 760 " +
-                          "C 780 760, 710 730, 650 730 " +
-                          "L 510 730 " +
-                          "C 450 730, 380 760, 270 760 " +
+                          "C 740 760, 680 710, 580 710 " +
+                          "S 420 760, 270 760 " +
                           "A 250 380 0 0 1 270 0 Z"
+                }
+            }
+
+            // Lớp thứ 2: Glass Reflection (Viền sáng mô phỏng mép kính vát)
+            ShapePath {
+                fillColor: "transparent"
+                strokeColor: Qt.rgba(1.0, 1.0, 1.0, 0.15)
+                strokeWidth: 4
+
+                // Thu nhỏ (inset) 4 pixel so với viền ngoài
+                PathSvg {
+                    path: "M 270 4 " +
+                          "C 420 4, 480 54, 580 54 " +
+                          "S 740 4, 890 4 " +
+                          "A 246 376 0 0 1 886 756 " +
+                          "C 740 756, 680 706, 580 706 " +
+                          "S 420 756, 270 756 " +
+                          "A 246 376 0 0 1 274 4 Z"
                 }
             }
         }
