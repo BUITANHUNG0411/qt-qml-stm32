@@ -57,6 +57,8 @@ A scalable, highly interactive Qt 6 / QML PC application simulating a digital au
 | **State-Driven Layouts** | QML `States` bound to C++ string properties allow seamless, animated morphing between vehicle types. |
 | **Simulator Swap (USE_SIMULATOR)** | Dependency Injection in `main.cpp` allows instant switching between virtual mock data (`SimulatorService`) and real hardware (`SerialService`). |
 | **Watchdog & Auto-Reconnect** | Hardcoded safety mechanism in `SerialService` to guarantee UI falls back to a warning state if hardware disconnects. |
+| **Monolithic Glass Frame** | Application runs as a Frameless Transparent Window (`Qt.FramelessWindowHint`). A rounded `Rectangle` (`radius: 40`) acts as the custom hardware bezel to simulate a modern physical dashboard. |
+| **Tick-Based Illumination** | Gauge tracking relies on dynamic illumination of discrete ticks (`isIlluminated`) rather than continuous solid arcs, maximizing the "Neon Cyberpunk" digital aesthetic without JS overhead. |
 
 ## 6. Project Layout (Do not deviate without reason)
 ```text

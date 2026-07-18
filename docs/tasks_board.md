@@ -43,3 +43,8 @@
 - [x] Expose `connectionStatusChanged` from `SerialService`.
 - [x] Remove static `#define USE_SIMULATOR`.
 - [x] Implement runtime switching logic in `main.cpp`.
+
+## Phase 8: UI/UX Aesthetic Refinement
+- [x] Refactor Active Track to "Tick-Based Illumination" (Neon Cyberpunk style).
+- [x] Prototype Double Arch hardware bezel (Evaluated and Reverted).
+- [x] Implement Monolithic Glass Frame (Frameless Window with rounded corners).
