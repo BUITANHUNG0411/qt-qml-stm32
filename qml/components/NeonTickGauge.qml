@@ -22,13 +22,9 @@ Item {
     property real redlineValue: -1 
 
     // Giá trị hiển thị chạy mượt mà (trailing effect)
-    property real displayedValue: 0
+    property real displayedValue: value
     Behavior on displayedValue {
         NumberAnimation { duration: 250; easing.type: Easing.OutQuad }
-    }
-    
-    onValueChanged: {
-        displayedValue = value
     }
 
     // Lớp 1: Ánh sáng nền (Ambient Backlight)

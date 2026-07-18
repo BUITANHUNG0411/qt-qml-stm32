@@ -36,7 +36,7 @@ SerialService::~SerialService()
 
 void SerialService::startService()
 {
-    if (m_serial->open(QIODevice::ReadOnly)) {
+    if (m_serial->open(QIODevice::ReadWrite)) {
         qDebug() << "Serial port" << m_portName << "opened successfully. Waiting for data...";
         m_watchdogTimer->start();
         m_reconnectTimer->stop();
@@ -60,6 +60,18 @@ void SerialService::stopService()
     m_reconnectTimer->stop();
 }
 
+void SerialService::sendCommand(const QString &command)
+{
+    if (m_serial->isOpen() && m_serial->isWritable()) {
+        m_serial->write((command + "\n").toUtf8());
+    }
+}
+
+void SerialService::emergencyStop()
+{
+    sendCommand("STOP;");
+}
+
 void SerialService::handleReadyRead()
 {
     m_buffer.append(m_serial->readAll());
@@ -79,19 +91,13 @@ void SerialService::handleReadyRead()
 
 void SerialService::parseTelemetry(const QString &line)
 {
-    // Format: TEL,RPM,VBAT,ERROR;
-    if (line.startsWith("TEL,") && line.endsWith(";")) {
-        // Reset watchdog timer
-        m_watchdogTimer->start();
-
-        if (!m_isConnected) {
-            m_isConnected = true;
-            emit connectionStatusChanged(true);
-        }
-
-        QString payload = line.mid(4, line.length() - 5);
-        QStringList parts = payload.split(",");
+    // Format: TEL,RPM,VBAT,ERROR;CHECKSUM
+    if (line.startsWith("TEL,") && line.contains(";")) {
+        int semiIndex = line.lastIndexOf(';');
+        QString payload = line.mid(4, semiIndex - 4);
+        QString checksumStr = line.mid(semiIndex + 1);
         
+        QStringList parts = payload.split(",");
         if (parts.size() == 3) {
             bool okRpm, okVbat, okError;
             int rpm = parts[0].toInt(&okRpm);
@@ -99,30 +105,20 @@ void SerialService::parseTelemetry(const QString &line)
             int error = parts[2].toInt(&okError);
 
             if (okRpm && okVbat && okError) {
-                updateCalculatedTelemetry(rpm, vbat, error);
+                // Verify checksum
+                int expectedChecksum = (rpm + static_cast<int>(vbat) + error) % 256;
+                if (checksumStr.isEmpty() || checksumStr.toInt() == expectedChecksum) {
+                    m_watchdogTimer->start();
+                    if (!m_isConnected) {
+                        m_isConnected = true;
+                        emit connectionStatusChanged(true);
+                    }
+                    m_lastRpm = rpm;
+                    emit rawTelemetryUpdated(rpm, vbat, error);
+                }
             }
         }
     }
-}
-
-void SerialService::updateCalculatedTelemetry(int rpm, double vbat, int error)
-{
-    m_lastRpm = rpm;
-    
-    // Simulate Speed based on RPM
-    m_lastSpeed = static_cast<double>(rpm) * 0.03; // Simple scalar for demo
-
-    // Determine Gear based on Speed
-    QString gear = "P";
-    if (m_lastSpeed > 0 && m_lastSpeed <= 20) gear = "1";
-    else if (m_lastSpeed > 20 && m_lastSpeed <= 40) gear = "2";
-    else if (m_lastSpeed > 40 && m_lastSpeed <= 60) gear = "3";
-    else if (m_lastSpeed > 60 && m_lastSpeed <= 80) gear = "4";
-    else if (m_lastSpeed > 80) gear = "5";
-
-    bool isWarning = (error != 0) || (vbat < 10.5); // Warning if error code or low battery
-
-    emit telemetryUpdated(m_lastSpeed, m_lastRpm, gear, isWarning, 100, 325, 57);
 }
 
 void SerialService::handleError(QSerialPort::SerialPortError error)
@@ -144,7 +140,12 @@ void SerialService::handleWatchdogTimeout()
     }
     m_lastSpeed = 0.0;
     m_lastRpm = 0;
-    emit telemetryUpdated(m_lastSpeed, m_lastRpm, "P", true, 100, 325, 57);
+    emit rawTelemetryUpdated(0, 0.0, 1); // 1 = error/stale data
+    
+    // Auto-reconnect
+    if (!m_reconnectTimer->isActive()) {
+        m_reconnectTimer->start();
+    }
 }
 
 void SerialService::tryReconnect()

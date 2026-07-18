@@ -94,7 +94,10 @@ Item {
                     
                     MouseArea {
                         anchors.fill: parent
-                        onClicked: pathView.currentIndex = index
+                        onClicked: {
+                            pathView.currentIndex = index
+                            MusicViewModel.setCurrentIndex(index)
+                        }
                     }
                 }
             }
@@ -225,7 +228,7 @@ Item {
                         Image {
                             id: prevIcon
                             anchors.fill: parent
-                            source: "../../resources/icons/prev.svg"
+                            source: "qrc:/qt/qml/com/showcase/resources/icons/prev.svg"
                             sourceSize: Qt.size(26, 26)
                             visible: false
                         }
@@ -257,7 +260,7 @@ Item {
                             height: 20
                             anchors.centerIn: parent
                             // Toggle icon based on playing state
-                            source: MusicViewModel.isPlaying ? "../../resources/icons/pause.svg" : "../../resources/icons/play.svg" 
+                            source: MusicViewModel.isPlaying ? "qrc:/qt/qml/com/showcase/resources/icons/pause.svg" : "qrc:/qt/qml/com/showcase/resources/icons/play.svg" 
                             sourceSize: Qt.size(20, 20)
                             visible: false
                         }
@@ -281,7 +284,7 @@ Item {
                         Image {
                             id: nextIcon
                             anchors.fill: parent
-                            source: "../../resources/icons/next.svg"
+                            source: "qrc:/qt/qml/com/showcase/resources/icons/next.svg"
                             sourceSize: Qt.size(26, 26)
                             visible: false
                         }

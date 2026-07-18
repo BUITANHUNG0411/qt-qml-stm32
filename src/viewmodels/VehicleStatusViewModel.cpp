@@ -113,3 +113,27 @@ void VehicleStatusViewModel::updateTelemetry(double speed, int rpm, const QStrin
     setRange(range);
     setTemperature(temperature);
 }
+
+void VehicleStatusViewModel::updateRawTelemetry(int rpm, double vbat, int error)
+{
+    setRpm(rpm);
+    
+    double calcSpeed = static_cast<double>(rpm) * 0.03;
+    setSpeed(calcSpeed);
+
+    QString calcGear = "N";
+    if (calcSpeed > 0 && calcSpeed <= 20) calcGear = "1";
+    else if (calcSpeed > 20 && calcSpeed <= 40) calcGear = "2";
+    else if (calcSpeed > 40 && calcSpeed <= 60) calcGear = "3";
+    else if (calcSpeed > 60 && calcSpeed <= 80) calcGear = "4";
+    else if (calcSpeed > 80) calcGear = "5";
+    setGear(calcGear);
+
+    bool warning = (error != 0) || (vbat < 10.5);
+    setIsWarning(warning);
+    
+    // Default values if hardware doesn't provide them
+    setBattery(100);
+    setRange(325);
+    setTemperature(57);
+}

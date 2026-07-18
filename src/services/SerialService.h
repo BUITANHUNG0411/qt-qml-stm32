@@ -16,9 +16,11 @@ public:
 
     void startService();
     void stopService();
+    void sendCommand(const QString &command);
+    void emergencyStop();
 
 signals:
-    void telemetryUpdated(double speed, int rpm, const QString &gear, bool isWarning, int battery, int range, int temperature);
+    void rawTelemetryUpdated(int rpm, double vbat, int error);
     void connectionStatusChanged(bool isConnected);
 
 private slots:
@@ -29,7 +31,6 @@ private slots:
 
 private:
     void parseTelemetry(const QString &line);
-    void updateCalculatedTelemetry(int rpm, double vbat, int error);
 
     QSerialPort *m_serial;
     QTimer *m_watchdogTimer;

@@ -58,6 +58,27 @@ private slots:
         QCOMPARE(vm.isWarning(), true);
         QCOMPARE(spy.count(), 1);
     }
+    
+    void testUpdateRawTelemetry() {
+        VehicleStatusViewModel vm;
+        
+        // RPM = 3000 -> speed = 3000 * 0.03 = 90
+        // Speed > 80 -> Gear 5
+        // Error = 0, VBat = 12.0 -> Warning = false
+        vm.updateRawTelemetry(3000, 12.0, 0);
+        
+        QCOMPARE(vm.rpm(), 3000);
+        QCOMPARE(vm.speed(), 90.0);
+        QCOMPARE(vm.gear(), QString("5"));
+        QCOMPARE(vm.isWarning(), false);
+        
+        // Test warning logic
+        vm.updateRawTelemetry(3000, 10.0, 0); // VBat < 10.5
+        QCOMPARE(vm.isWarning(), true);
+        
+        vm.updateRawTelemetry(3000, 12.0, 1); // Error != 0
+        QCOMPARE(vm.isWarning(), true);
+    }
 };
 
 QTEST_MAIN(TestViewModels)

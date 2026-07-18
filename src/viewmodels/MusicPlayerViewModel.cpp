@@ -28,9 +28,9 @@ MusicPlayerViewModel::MusicPlayerViewModel(QObject *parent)
 MusicPlayerViewModel::~MusicPlayerViewModel()
 {
     m_scannerThread.requestInterruption();
+    m_scanner->deleteLater();
     m_scannerThread.quit();
     m_scannerThread.wait();
-    delete m_scanner;
 }
 
 int MusicPlayerViewModel::rowCount(const QModelIndex &parent) const
@@ -77,7 +77,13 @@ void MusicPlayerViewModel::setCurrentIndex(int index)
     if (index >= 0 && index < m_songs.count()) {
         m_currentIndex = index;
         emit currentIndexChanged();
-        play(m_currentIndex);
+        
+        // Reset progress when changing track
+        m_progress = 0.0f;
+        emit progressChanged();
+        
+        m_player->setSource(QUrl::fromLocalFile(m_songs[m_currentIndex].filePath));
+        m_player->play();
     }
 }
 
@@ -98,12 +104,9 @@ bool MusicPlayerViewModel::isScanning() const
 
 void MusicPlayerViewModel::play(int index)
 {
-    if (index != -1 && index != m_currentIndex && index < m_songs.count()) {
-        m_currentIndex = index;
-        emit currentIndexChanged();
-        m_player->setSource(QUrl::fromLocalFile(m_songs[m_currentIndex].filePath));
-    }
-    if (m_currentIndex >= 0 && m_currentIndex < m_songs.count()) {
+    if (index != -1 && index != m_currentIndex) {
+        setCurrentIndex(index);
+    } else if (m_currentIndex >= 0 && m_currentIndex < m_songs.count()) {
         m_player->play();
     }
 }
@@ -143,6 +146,14 @@ void MusicPlayerViewModel::prev()
 void MusicPlayerViewModel::scanLibrary()
 {
     if (m_isScanning) return;
+    
+    beginResetModel();
+    m_songs.clear();
+    m_currentIndex = -1;
+    m_player->stop();
+    endResetModel();
+    emit currentIndexChanged();
+
     m_isScanning = true;
     emit isScanningChanged();
     
@@ -156,11 +167,14 @@ void MusicPlayerViewModel::onSongFound(const SongData& song)
     m_songs.append(song);
     endInsertRows();
 
-    // Select the first song automatically
+    // Select the first song automatically and start playing
     if (m_songs.count() == 1) {
         m_currentIndex = 0;
         emit currentIndexChanged();
+        m_progress = 0.0f;
+        emit progressChanged();
         m_player->setSource(QUrl::fromLocalFile(m_songs[0].filePath));
+        m_player->play();
     }
 }
 

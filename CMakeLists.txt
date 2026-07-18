@@ -39,8 +39,6 @@ qt_add_qml_module(${PROJECT_NAME}
         qml/Main.qml
         qml/Theme.qml
         qml/components/GlowingText.qml
-        qml/components/CircularGauge.qml
-        qml/components/GlassPanel.qml
         qml/components/NeonTickGauge.qml
         qml/components/MusicPlayer.qml
         qml/screens/DashboardScreen.qml

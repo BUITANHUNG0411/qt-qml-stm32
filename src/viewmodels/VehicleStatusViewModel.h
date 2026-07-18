@@ -7,7 +7,6 @@
 class VehicleStatusViewModel : public QObject
 {
     Q_OBJECT
-    QML_ELEMENT
 
     Q_PROPERTY(double speed READ speed WRITE setSpeed NOTIFY speedChanged)
     Q_PROPERTY(int rpm READ rpm WRITE setRpm NOTIFY rpmChanged)
@@ -43,6 +42,7 @@ public:
 
 public slots:
     void updateTelemetry(double speed, int rpm, const QString &gear, bool isWarning, int battery = 100, int range = 325, int temperature = 57);
+    void updateRawTelemetry(int rpm, double vbat, int error);
 
 signals:
     void speedChanged();

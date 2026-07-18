@@ -20,23 +20,11 @@ MockTelemetry MockScenarioEngine::getCurrentTelemetry() const {
 void MockScenarioEngine::tick(double deltaTimeMs) {
     m_elapsedTimeMs += deltaTimeMs;
 
-    // Cycle through scenarios every 10 seconds to demonstrate different states
-    int cycleTime = (int)(m_elapsedTimeMs / 1000.0) % 30;
-    
-    if (cycleTime < 10) {
-        if (m_currentScenario != Scenario::DragRace) {
-            m_currentScenario = Scenario::DragRace;
-        }
+    if (m_currentScenario == Scenario::DragRace) {
         updateDragRace(deltaTimeMs);
-    } else if (cycleTime < 20) {
-        if (m_currentScenario != Scenario::BatteryDrain) {
-            m_currentScenario = Scenario::BatteryDrain;
-        }
+    } else if (m_currentScenario == Scenario::BatteryDrain) {
         updateBatteryDrain(deltaTimeMs);
-    } else {
-        if (m_currentScenario != Scenario::ErrorInjection) {
-            m_currentScenario = Scenario::ErrorInjection;
-        }
+    } else if (m_currentScenario == Scenario::ErrorInjection) {
         updateErrorInjection(deltaTimeMs);
     }
 }
