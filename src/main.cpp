@@ -1,6 +1,7 @@
 #include "services/SerialService.h"
 #include "services/SimulatorService.h"
 #include "viewmodels/VehicleStatusViewModel.h"
+#include "viewmodels/MusicPlayerViewModel.h"
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
@@ -48,8 +49,10 @@ int main(int argc, char *argv[]) {
 
   QQmlApplicationEngine engine;
 
-  // Expose ViewModel to QML
+  // Expose ViewModels to QML
+  MusicPlayerViewModel musicVm;
   engine.rootContext()->setContextProperty("VehicleStatus", &vm);
+  engine.rootContext()->setContextProperty("MusicViewModel", &musicVm);
 
   QObject::connect(
       &engine, &QQmlApplicationEngine::objectCreationFailed, &app,

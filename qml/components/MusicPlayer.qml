@@ -9,16 +9,6 @@ Item {
     implicitWidth: 350
     implicitHeight: 450
 
-    // Mock Data Model
-    ListModel {
-        id: songModel
-        ListElement { title: "Starboy"; artist: "The Weeknd, Daft Punk"; color1: "#FF0055"; color2: "#4A00E0" }
-        ListElement { title: "Nightcall"; artist: "Kavinsky"; color1: "#00E5FF"; color2: "#0055FF" }
-        ListElement { title: "Resonance"; artist: "HOME"; color1: "#B400FF"; color2: "#2A0055" }
-        ListElement { title: "Blinding Lights"; artist: "The Weeknd"; color1: "#FFDD00"; color2: "#FF5500" }
-        ListElement { title: "Tech Noir"; artist: "Gunship"; color1: "#00FF7F"; color2: "#005522" }
-    }
-
     ColumnLayout {
         anchors.fill: parent
         spacing: 20
@@ -31,7 +21,7 @@ Item {
             PathView {
                 id: pathView
                 anchors.fill: parent
-                model: songModel
+                model: MusicViewModel
                 pathItemCount: 3
                 preferredHighlightBegin: 0.5
                 preferredHighlightEnd: 0.5
@@ -74,8 +64,8 @@ Item {
                         anchors.fill: parent
                         radius: 16
                         gradient: Gradient {
-                            GradientStop { position: 0.0; color: model.color1 }
-                            GradientStop { position: 1.0; color: model.color2 }
+                            GradientStop { position: 0.0; color: model.color1 !== undefined ? model.color1 : "#FF0055" }
+                            GradientStop { position: 1.0; color: model.color2 !== undefined ? model.color2 : "#4A00E0" }
                         }
                         border.color: PathView.isCurrentItem ? Theme.accentCyan : "transparent"
                         border.width: PathView.isCurrentItem ? 2 : 0
@@ -124,7 +114,7 @@ Item {
                 anchors.margins: 15
                 spacing: 5
 
-                // Track Info
+                // Track Info & Scan Button
                 Item {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 50
@@ -133,7 +123,7 @@ Item {
                         anchors.centerIn: parent
                         spacing: 2
                         Text {
-                            text: pathView.currentItem ? pathView.currentItem.songTitle : ""
+                            text: pathView.currentItem ? pathView.currentItem.songTitle : (MusicViewModel.isScanning ? "Scanning..." : "No Music")
                             font.family: Theme.fontMain
                             font.pixelSize: 22
                             font.bold: true
@@ -146,6 +136,32 @@ Item {
                             font.pixelSize: 14
                             color: Theme.textSecondary
                             anchors.horizontalCenter: parent.horizontalCenter
+                        }
+                    }
+
+                    // Scan Library Button
+                    Rectangle {
+                        anchors.right: parent.right
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: 70
+                        height: 30
+                        radius: 8
+                        color: MusicViewModel.isScanning ? Theme.accentCyan : "transparent"
+                        border.color: Theme.accentCyan
+                        border.width: 1
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: MusicViewModel.isScanning ? "..." : "Scan"
+                            color: MusicViewModel.isScanning ? Theme.backgroundDeepSpace : Theme.accentCyan
+                            font.family: Theme.fontMain
+                            font.pixelSize: 14
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: MusicViewModel.scanLibrary()
+                            enabled: !MusicViewModel.isScanning
                         }
                     }
                 }
@@ -163,7 +179,7 @@ Item {
                         radius: 1.5
                         
                         Rectangle {
-                            width: parent.width * 0.45 // Mock playback progress
+                            width: parent.width * MusicViewModel.progress // Bind to real progress
                             height: parent.height
                             color: Theme.accentCyan
                             radius: 1.5
@@ -220,7 +236,7 @@ Item {
                             colorizationColor: prevMouse.pressed ? Theme.accentCyan : Theme.textPrimary
                             Behavior on colorizationColor { ColorAnimation { duration: 100 } }
                         }
-                        MouseArea { id: prevMouse; anchors.fill: parent; onClicked: pathView.decrementCurrentIndex() }
+                        MouseArea { id: prevMouse; anchors.fill: parent; onClicked: MusicViewModel.prev() }
                     }
 
                     // Play/Pause Button
@@ -240,8 +256,8 @@ Item {
                             width: 20
                             height: 20
                             anchors.centerIn: parent
-                            // Mock toggling icon, just use pause for now
-                            source: "../../resources/icons/pause.svg" 
+                            // Toggle icon based on playing state
+                            source: MusicViewModel.isPlaying ? "../../resources/icons/pause.svg" : "../../resources/icons/play.svg" 
                             sourceSize: Qt.size(20, 20)
                             visible: false
                         }
@@ -252,7 +268,7 @@ Item {
                             colorizationColor: playMouse.pressed ? Theme.backgroundDeepSpace : Theme.accentCyan
                             Behavior on colorizationColor { ColorAnimation { duration: 100 } }
                         }
-                        MouseArea { id: playMouse; anchors.fill: parent }
+                        MouseArea { id: playMouse; anchors.fill: parent; onClicked: MusicViewModel.togglePlayPause() }
                     }
 
                     // Next Button
@@ -276,7 +292,7 @@ Item {
                             colorizationColor: nextMouse.pressed ? Theme.accentCyan : Theme.textPrimary
                             Behavior on colorizationColor { ColorAnimation { duration: 100 } }
                         }
-                        MouseArea { id: nextMouse; anchors.fill: parent; onClicked: pathView.incrementCurrentIndex() }
+                        MouseArea { id: nextMouse; anchors.fill: parent; onClicked: MusicViewModel.next() }
                     }
 
                     Item { Layout.fillWidth: true } // Spacer

@@ -14,7 +14,7 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build." FORCE)
 endif()
 
-find_package(Qt6 6.8 REQUIRED COMPONENTS Core Gui Qml Quick Test SerialPort)
+find_package(Qt6 6.8 REQUIRED COMPONENTS Core Gui Qml Quick Test SerialPort Multimedia)
 
 qt_standard_project_setup(REQUIRES 6.8)
 
@@ -27,6 +27,7 @@ qt_add_executable(${PROJECT_NAME}
     src/services/SimulatorService.cpp
     src/services/MockScenarioEngine.cpp
     src/services/SerialService.cpp
+    src/services/MusicScanner.cpp
 )
 
 set_source_files_properties(qml/Theme.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
@@ -51,10 +52,12 @@ qt_add_qml_module(${PROJECT_NAME}
     SOURCES
         src/viewmodels/VehicleStatusViewModel.h
         src/viewmodels/VehicleStatusViewModel.cpp
+        src/viewmodels/MusicPlayerViewModel.h
+        src/viewmodels/MusicPlayerViewModel.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}
-    PRIVATE Qt6::Core Qt6::Gui Qt6::Qml Qt6::Quick Qt6::SerialPort
+    PRIVATE Qt6::Core Qt6::Gui Qt6::Qml Qt6::Quick Qt6::SerialPort Qt6::Multimedia
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE src src/viewmodels)
