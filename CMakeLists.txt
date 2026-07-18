@@ -41,6 +41,7 @@ qt_add_qml_module(${PROJECT_NAME}
         qml/components/CircularGauge.qml
         qml/components/GlassPanel.qml
         qml/components/NeonTickGauge.qml
+        qml/components/MusicPlayer.qml
         qml/screens/DashboardScreen.qml
     SOURCES
         src/viewmodels/VehicleStatusViewModel.h

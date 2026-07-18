@@ -25,17 +25,19 @@ Item {
     }
 
     // Main 3-Panel Layout
-    RowLayout {
-        anchors.centerIn: parent
-        anchors.verticalCenterOffset: -30 // Đưa cụm đồng hồ lên 30px để khớp hoàn hảo với phần lõm của khung
-        width: parent.width * 0.85
-        height: 400
-        spacing: 60
+    Item {
+        anchors.fill: parent
 
         // Left Panel (Speed)
         Item {
-            Layout.preferredWidth: 350
-            Layout.fillHeight: true
+            id: leftPanel
+            width: 350
+            height: 400
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.verticalCenterOffset: -30
+            // Exact center of the left arch is X=270 in clusterFrame. 
+            // DashboardScreen has 10 margin inside clusterFrame, so X=260 relative to parent.
+            x: 260 - width / 2
 
             NeonTickGauge {
                 anchors.centerIn: parent
@@ -72,75 +74,33 @@ Item {
         }
 
         // Center Panel (Media/Nav)
-        GlassPanel {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
+        Item {
+            id: centerPanel
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.verticalCenterOffset: -30
+            height: 450
+            anchors.left: leftPanel.right
+            anchors.right: rightPanel.left
+            anchors.leftMargin: -20
+            anchors.rightMargin: -20
+            z: -1 // Push slightly behind the gauges to create depth and prevent overlapping the glowing ticks
 
-            Column {
-                anchors.centerIn: parent
-                spacing: 25
-
-                // Mock Album Art (Cyberpunk Style)
-                Item {
-                    width: 200; height: 200
-                    anchors.horizontalCenter: parent.horizontalCenter
-
-                    // Album art background (Neon Gradient)
-                    Rectangle {
-                        anchors.fill: parent
-                        radius: 12
-                        gradient: Gradient {
-                            GradientStop { position: 0.0; color: "#FF0055" } // Neon Magenta
-                            GradientStop { position: 1.0; color: "#4A00E0" } // Deep Purple
-                        }
-                        opacity: 0.8
-                    }
-
-                    // Fade out mask at the bottom for smooth blending
-                    Rectangle {
-                        anchors.fill: parent
-                        radius: 12
-                        gradient: Gradient {
-                            GradientStop { position: 0.4; color: "transparent" }
-                            GradientStop { position: 1.0; color: Theme.backgroundDeepSpace } // Fades into background
-                        }
-                    }
-                    
-                    Text {
-                        anchors.centerIn: parent
-                        text: "PLAYING"
-                        color: "white"
-                        font.family: Theme.fontMain
-                        font.pixelSize: 16
-                        font.letterSpacing: 6
-                        font.bold: true
-                        opacity: 0.8
-                    }
-                }
-
-                Text {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    text: "Starboy"
-                    color: Theme.textPrimary
-                    font.family: Theme.fontMain
-                    font.pixelSize: 28
-                    font.bold: true
-                }
-                
-                Text {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    text: "The Weeknd, Daft Punk"
-                    color: Theme.textSecondary
-                    font.family: Theme.fontMain
-                    font.pixelSize: 16
-                }
+            MusicPlayer {
+                anchors.fill: parent
+                anchors.margins: 10
             }
         }
 
         // Right Panel (Gear/RPM)
         Item {
-            Layout.preferredWidth: 350
-            Layout.fillHeight: true
+            id: rightPanel
+            width: 350
+            height: 400
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.verticalCenterOffset: -30
+            // Exact center of the right arch is X=890 in clusterFrame.
+            // DashboardScreen has 10 margin inside clusterFrame, so X=880 relative to parent.
+            x: 880 - width / 2
 
             NeonTickGauge {
                 anchors.centerIn: parent
