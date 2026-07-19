@@ -63,3 +63,13 @@
 - [x] Architect and implement `MusicScanner` C++ worker using `QThread` for non-blocking OS directory scanning.
 - [x] Implement `MusicPlayerViewModel` (MVVM) inheriting `QAbstractListModel` with `QMediaPlayer` integration.
 - [x] Bind `MusicPlayer.qml` directly to `MusicViewModel` exposing `progress`, `isPlaying`, and playback slots.
+
+## Phase 10: Architecture Audit & Technical Debt Eradication
+- [x] Run comprehensive Architecture Audit based on `AGENTS.md` and `Zero-JS` rule.
+- [x] Fix Critical Multi-Threading Bugs (MusicPlayer UB, Rescan Leak).
+- [x] Fix SerialService Watchdog Reconnect.
+- [x] Strip all imperative JS logic from `NeonTickGauge.qml` and `MusicPlayer.qml`.
+- [x] Refactor SerialService MVVM Leak: move calculated telemetry back to `VehicleStatusViewModel`.
+- [x] Implement proper SerialService write-back (`STOP`) and Checksum protocol validation.
+- [x] Clean up orphaned files and dead code (`CircularGauge.qml`, `GlassPanel.qml`, `QML_ELEMENT`, `MockScenarioEngine::setScenario`).
+- [x] Add Unit Tests for `VehicleStatusViewModel::updateRawTelemetry`.
