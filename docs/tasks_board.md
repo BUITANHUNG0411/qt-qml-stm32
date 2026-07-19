@@ -73,3 +73,10 @@
 - [x] Implement proper SerialService write-back (`STOP`) and Checksum protocol validation.
 - [x] Clean up orphaned files and dead code (`CircularGauge.qml`, `GlassPanel.qml`, `QML_ELEMENT`, `MockScenarioEngine::setScenario`).
 - [x] Add Unit Tests for `VehicleStatusViewModel::updateRawTelemetry`.
+
+## Phase 11: UI Standardization & Layout Refactor
+- [x] Consolidate Design Tokens in `Theme.qml` (radii, durations, typography, geometry).
+- [x] Componentize repetitive UI elements (`EnergyBlocks`, `GlassPanel`, `NeonIcon`, `NeonIconButton`).
+- [x] Refactor `MusicPlayer.qml` to use declarative bindings exclusively (removed Connections & JS imperative logic).
+- [x] Transition `DashboardScreen` and `NeonTickGauge` from absolute (magic number) coordinates to declarative `anchors` aligned precisely with the `PathSvg` Double Arch bezel.
+- [x] Resolve all compiler warnings (`-Wconversion`) with proper `static_cast` in C++ ViewModels.

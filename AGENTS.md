@@ -61,7 +61,7 @@ A scalable, highly interactive Qt 6 / QML PC application simulating a digital au
 | **Glassmorphism Aesthetic** | Central panels use translucent backgrounds with subtle diagonal gradients (`#2C353F` tinted base) and fade-out masks to simulate frosted glass and cyberpunk neon lighting. |
 | **Tick-Based Illumination** | Gauge tracking relies on dynamic illumination of discrete ticks (`isIlluminated`) rather than continuous solid arcs, maximizing the "Neon Cyberpunk" digital aesthetic without JS overhead. |
 | **3D Cover Flow (PathView)** | Using native `PathView` with `PathAttribute` for performant, Zero-JS 3D music carousel instead of heavy 3D engines or complex JS math. |
-| **Absolute Bezel Alignment** | `DashboardScreen` uses absolute coordinates (avoiding `RowLayout`) to lock gauge centers precisely to the `PathSvg` Double Arch bezels, preventing UI overflow. |
+| **Declarative Bezel Alignment** | `DashboardScreen` uses robust `anchors` and `Theme.qml` geometry tokens (e.g., `gaugeInsetLeft`) to lock gauge centers precisely to the `PathSvg` Double Arch bezels, maximizing maintainability while preventing UI overflow. |
 | **Async Media Scanning** | Use `QThread` with `QDirIterator` (Worker Object pattern) in C++ to scan OS directories without blocking the QML Render Thread. |
 | **C++ Audio Playback** | `QMediaPlayer` is managed entirely within `MusicPlayerViewModel`. Playback state and progress are exposed to QML via `Q_PROPERTY` to ensure Zero JS. |
 
