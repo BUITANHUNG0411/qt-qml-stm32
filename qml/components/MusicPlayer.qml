@@ -21,11 +21,22 @@ Item {
         color: Theme.backgroundDeepSpace
         opacity: 0.65
 
-        Rectangle {
+        Item {
+            id: backdropSource
             anchors.fill: parent
-            gradient: Gradient {
-                GradientStop { position: 0.0; color: pathView.currentItem !== null ? (pathView.currentItem.coverColor1 !== undefined ? pathView.currentItem.coverColor1 : "#FF0055") : "#FF0055" }
-                GradientStop { position: 1.0; color: Theme.backgroundDeepSpace }
+            Image {
+                anchors.fill: parent
+                source: pathView.currentItem !== null ? pathView.currentItem.coverArt : ""
+                fillMode: Image.PreserveAspectCrop
+                visible: source.toString() !== ""
+            }
+            Rectangle {
+                anchors.fill: parent
+                visible: parent.children[0].source.toString() === ""
+                gradient: Gradient {
+                    GradientStop { position: 0.0; color: pathView.currentItem !== null ? (pathView.currentItem.coverColor1 !== undefined ? pathView.currentItem.coverColor1 : "#FF0055") : "#FF0055" }
+                    GradientStop { position: 1.0; color: Theme.backgroundDeepSpace }
+                }
             }
         }
 
@@ -97,48 +108,26 @@ Item {
                     property string songArtist: model.artist
                     property string coverColor1: model.color1
                     property string coverColor2: model.color2
-                    property string songCoverArt: model.coverArt !== undefined ? model.coverArt : ""
+                    property string coverArt: model.coverArt !== undefined ? model.coverArt : ""
 
                     // Base container for the cover (rotates when playing)
                     Rectangle {
                         id: coverRect
                         anchors.fill: parent
                         radius: 16
-                        color: "transparent"
+                        gradient: Gradient {
+                            GradientStop { position: 0.0; color: model.color1 !== undefined ? model.color1 : "#FF0055" }
+                            GradientStop { position: 1.0; color: model.color2 !== undefined ? model.color2 : "#4A00E0" }
+                        }
                         border.color: PathView.isCurrentItem ? Theme.accentCyan : "transparent"
                         border.width: PathView.isCurrentItem ? 2 : 0
-
-                        Rectangle {
-                            anchors.fill: parent
-                            radius: 16
-                            visible: songCoverArt === ""
-                            gradient: Gradient {
-                                GradientStop { position: 0.0; color: model.color1 !== undefined ? model.color1 : "#FF0055" }
-                                GradientStop { position: 1.0; color: model.color2 !== undefined ? model.color2 : "#4A00E0" }
-                            }
-                        }
-
-                        Rectangle {
-                            id: maskRect
-                            anchors.fill: parent
-                            radius: 16
-                            visible: false
-                        }
+                        clip: true
 
                         Image {
-                            id: coverImg
                             anchors.fill: parent
-                            source: songCoverArt
+                            source: parent.parent.coverArt
                             fillMode: Image.PreserveAspectCrop
-                            visible: false
-                        }
-
-                        MultiEffect {
-                            anchors.fill: parent
-                            source: coverImg
-                            maskEnabled: true
-                            maskSource: maskRect
-                            visible: songCoverArt !== ""
+                            visible: source.toString() !== ""
                         }
 
                         transform: Rotation {
@@ -262,20 +251,23 @@ Item {
                         Text {
                             text: pathView.currentItem ? pathView.currentItem.songTitle : (MusicViewModel.isScanning ? "Scanning..." : "No Music")
                             font.family: Theme.fontMain
-                            font.pixelSize: 20
+                            font.pixelSize: 18
                             font.bold: true
                             color: Theme.textPrimary
                             anchors.horizontalCenter: parent.horizontalCenter
-                            width: parent.width * 0.95
+                            width: parent.width - 80
                             horizontalAlignment: Text.AlignHCenter
                             elide: Text.ElideRight
                         }
                         Text {
                             text: pathView.currentItem ? pathView.currentItem.songArtist : ""
                             font.family: Theme.fontMain
-                            font.pixelSize: 14
+                            font.pixelSize: 12
                             color: Theme.textSecondary
                             anchors.horizontalCenter: parent.horizontalCenter
+                            width: parent.width - 80
+                            horizontalAlignment: Text.AlignHCenter
+                            elide: Text.ElideRight
                         }
                     }
 
