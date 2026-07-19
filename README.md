@@ -57,6 +57,14 @@
 
 ## Screenshots & Gallery
 
+### Dashboard Simulation Demo
+
+Watch the simulator in action (including Neon UI, dynamic gauges, and music player):
+
+<video src="resources/media/simulator-demo.webm" controls="controls" muted="muted" width="100%">
+  <a href="resources/media/simulator-demo.webm">View Simulator Demo Video</a>
+</video>
+
 <!-- TODO: screenshot — Main dashboard in Bike form factor -->
 <!-- TODO: screenshot — Serial disconnected state (auto-fallback to Simulator) -->
 
