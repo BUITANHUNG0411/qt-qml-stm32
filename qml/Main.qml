@@ -19,22 +19,24 @@ Window {
         onActivated: Qt.quit()
     }
 
-    // Khung Cluster vật lý giả lập dạng Double Arch
+    // Khung Cluster vật lý giả lập dạng Double Arch (Dựa theo tài liệu inspiration-design)
     Item {
         id: clusterFrame
         anchors.fill: parent
-        anchors.margins: Theme.bezelMargin
+        anchors.margins: Theme.bezelMargin // Tạo không gian nền trong suốt để nổi bật khối
 
         Shape {
             anchors.fill: parent
             layer.enabled: true
-            layer.samples: 8
+            layer.samples: 8 // Chống răng cưa (anti-aliasing) chất lượng cao
 
+            // Nền chính của khung
             ShapePath {
                 fillColor: Theme.backgroundDeepSpace
                 strokeColor: Qt.rgba(Theme.textSecondary.r, Theme.textSecondary.g, Theme.textSecondary.b, 0.5)
                 strokeWidth: 2
 
+                // Đường dẫn SVG tinh chỉnh cho mượt hoàn hảo bằng Cubic Bezier (C/S)
                 PathSvg {
                     path: "M 270 0 " +
                           "C 420 0, 480 50, 580 50 " +
@@ -46,11 +48,13 @@ Window {
                 }
             }
 
+            // Lớp thứ 2: Glass Reflection (Viền sáng mô phỏng mép kính vát)
             ShapePath {
                 fillColor: "transparent"
                 strokeColor: Theme.glassEdge
                 strokeWidth: 4
 
+                // Thu nhỏ (inset) 4 pixel so với viền ngoài
                 PathSvg {
                     path: "M 270 4 " +
                           "C 420 4, 480 54, 580 54 " +

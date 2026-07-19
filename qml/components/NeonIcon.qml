@@ -4,16 +4,16 @@ import com.showcase
 
 Item {
     id: root
-    property string source
-    property color colorizationColor: Theme.accentCyan
+    property alias source: iconImg.source
+    property alias sourceSize: iconImg.sourceSize
+    property color colorizationColor: Theme.textSecondary
     
     Image {
         id: iconImg
         anchors.fill: parent
-        source: root.source
-        sourceSize: Qt.size(width, height)
         visible: false
     }
+    
     MultiEffect {
         anchors.fill: iconImg
         source: iconImg

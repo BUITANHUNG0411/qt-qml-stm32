@@ -8,8 +8,6 @@ Item {
     anchors.fill: parent
 
     property QtObject vm: VehicleStatus
-    property real leftGaugeX: Theme.gaugeInsetLeft - Theme.dashboardMargin
-    property real rightGaugeX: Theme.gaugeInsetRight - Theme.dashboardMargin
 
     // Top Bar (Telltales)
     RowLayout {
@@ -20,10 +18,10 @@ Item {
         spacing: Theme.spaceXXl
 
         // Mock Icons (Cyberpunk style)
-        Rectangle { width: 30; height: 10; radius: 5; color: Theme.accentCyan; opacity: 0.5 }
-        Rectangle { width: 30; height: 10; radius: 5; color: Theme.textSecondary; opacity: 0.2 }
-        Rectangle { width: 30; height: 10; radius: 5; color: vm.isWarning ? Theme.warningRed : Theme.textSecondary; opacity: vm.isWarning ? 1.0 : 0.2 }
-        Rectangle { width: 30; height: 10; radius: 5; color: Theme.textSecondary; opacity: 0.2 }
+        Rectangle { Layout.preferredWidth: 30; Layout.preferredHeight: 10; radius: 5; color: Theme.accentCyan; opacity: 0.5 }
+        Rectangle { Layout.preferredWidth: 30; Layout.preferredHeight: 10; radius: 5; color: Theme.textSecondary; opacity: 0.2 }
+        Rectangle { Layout.preferredWidth: 30; Layout.preferredHeight: 10; radius: 5; color: vm.isWarning ? Theme.warningRed : Theme.textSecondary; opacity: vm.isWarning ? 1.0 : 0.2 }
+        Rectangle { Layout.preferredWidth: 30; Layout.preferredHeight: 10; radius: 5; color: Theme.textSecondary; opacity: 0.2 }
     }
 
     // Main 3-Panel Layout
@@ -36,9 +34,11 @@ Item {
             width: 350
             height: 400
             anchors.verticalCenter: parent.verticalCenter
-            anchors.verticalCenterOffset: Theme.panelLift
+            anchors.verticalCenterOffset: -Theme.panelLift
+            
+            // Replaced absolute x with anchors linked to Theme values
             anchors.left: parent.left
-            anchors.leftMargin: root.leftGaugeX - width / 2
+            anchors.leftMargin: Theme.gaugeInsetLeft - Theme.dashboardMargin - width / 2
 
             NeonTickGauge {
                 anchors.centerIn: parent
@@ -58,7 +58,7 @@ Item {
                 GlowingText {
                     anchors.horizontalCenter: parent.horizontalCenter
                     text: vm.displaySpeed
-                    font.pixelSize: 90
+                    font.pixelSize: Theme.displayMd
                     glowColor: vm.isWarning ? Theme.warningRed : Theme.accentCyan
                     color: Theme.textPrimary
                 }
@@ -68,7 +68,7 @@ Item {
                     text: "KM/H"
                     color: Theme.textSecondary
                     font.family: Theme.fontMain
-                    font.pixelSize: 18
+                    font.pixelSize: Theme.textMd
                     font.letterSpacing: 2
                 }
             }
@@ -80,7 +80,7 @@ Item {
         Item {
             id: centerPanel
             anchors.verticalCenter: parent.verticalCenter
-            anchors.verticalCenterOffset: Theme.panelLift
+            anchors.verticalCenterOffset: -Theme.panelLift
             height: 450
             anchors.left: leftPanel.right
             anchors.right: rightPanel.left
@@ -100,9 +100,11 @@ Item {
             width: 350
             height: 400
             anchors.verticalCenter: parent.verticalCenter
-            anchors.verticalCenterOffset: Theme.panelLift
+            anchors.verticalCenterOffset: -Theme.panelLift
+            
+            // Replaced absolute x with anchors linked to Theme values
             anchors.left: parent.left
-            anchors.leftMargin: root.rightGaugeX - width / 2
+            anchors.leftMargin: Theme.gaugeInsetRight - Theme.dashboardMargin - width / 2
 
             NeonTickGauge {
                 anchors.centerIn: parent
@@ -123,7 +125,7 @@ Item {
                 GlowingText {
                     anchors.horizontalCenter: parent.horizontalCenter
                     text: vm.gear
-                    font.pixelSize: 100
+                    font.pixelSize: Theme.displayLg
                     glowColor: vm.isWarning ? Theme.warningRed : Theme.accentCyan
                     color: Theme.textPrimary
                 }
@@ -133,7 +135,7 @@ Item {
                     text: "COMFORT"
                     color: Theme.accentCyan
                     font.family: Theme.fontMain
-                    font.pixelSize: 16
+                    font.pixelSize: Theme.textSm
                     font.letterSpacing: 2
                 }
             }
@@ -155,13 +157,11 @@ Item {
                 text: vm.range + " km"
                 color: Theme.textPrimary
                 font.family: Theme.fontMain
-                font.pixelSize: Theme.textLg
+                font.pixelSize: Theme.textLg 
             }
             EnergyBlocks {
-                value: vm.range
-                maxValue: 400
-                warningThreshold: 50
-                invertWarning: false
+                count: 20
+                activeCount: 15
             }
         }
 
@@ -170,12 +170,12 @@ Item {
         // Center: Temp
         Column {
             Layout.alignment: Qt.AlignHCenter
-            spacing: 5
+            spacing: Theme.spaceSm
             Text { 
                 text: "TEMP"
                 color: Theme.textSecondary
                 font.family: Theme.fontMain
-                font.pixelSize: 12
+                font.pixelSize: Theme.textXs
                 font.letterSpacing: 1
                 anchors.horizontalCenter: parent.horizontalCenter 
             }
@@ -183,7 +183,7 @@ Item {
                 text: vm.temperature + " °C"
                 color: Theme.textPrimary
                 font.family: Theme.fontMain
-                font.pixelSize: 22
+                font.pixelSize: Theme.textXl
                 anchors.horizontalCenter: parent.horizontalCenter 
             }
         }
@@ -203,10 +203,9 @@ Item {
             }
             EnergyBlocks {
                 anchors.right: parent.right 
-                value: vm.battery
-                maxValue: 100
-                warningThreshold: 20
-                invertWarning: false
+                count: 20
+                activeCount: vm.battery / 5
+                dangerThreshold: 4
             }
         }
     }

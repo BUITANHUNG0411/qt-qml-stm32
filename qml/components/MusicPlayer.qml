@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Shapes
 import QtQuick.Effects
 import com.showcase
 
@@ -8,10 +9,10 @@ Item {
     implicitWidth: 350
     implicitHeight: 450
 
-    // Local UI state
-    property bool scrubberDragging: scrberMouse.pressed
+    // Local UI state (declarative only — no JS logic)
+    property bool scrubberDragging: false
 
-    // Neon Blur Backdrop driven by current song
+    // Neon Blur Backdrop driven by current song color1 (Zero-JS)
     Rectangle {
         id: blurBackdrop
         anchors.fill: parent
@@ -48,7 +49,7 @@ Item {
 
     ColumnLayout {
         anchors.fill: parent
-        spacing: Theme.spaceXl
+        spacing: Theme.spaceLg
 
         // Top 70%: Cover Flow Area
         Item {
@@ -64,13 +65,12 @@ Item {
                 preferredHighlightEnd: 0.5
                 interactive: true
                 
+                // Pure declarative binding instead of Connections
                 currentIndex: MusicViewModel.currentIndex
-                onCurrentIndexChanged: {
-                    if (interactive && currentIndex !== MusicViewModel.currentIndex) {
-                        MusicViewModel.setCurrentIndex(currentIndex)
-                    }
-                }
 
+                onMovementEnded: MusicViewModel.setCurrentIndex(currentIndex)
+
+                // 3D Depth Path
                 path: Path {
                     startX: 0
                     startY: pathView.height / 2
@@ -97,12 +97,14 @@ Item {
                     opacity: PathView.itemOpacity
                     z: PathView.itemZ
 
+                    // Expose properties to avoid binding errors
                     property string songTitle: model.title
                     property string songArtist: model.artist
                     property string coverColor1: model.color1
                     property string coverColor2: model.color2
                     property string coverArt: model.coverArt !== undefined ? model.coverArt : ""
 
+                    // Base container for the cover (rotates when playing)
                     Rectangle {
                         id: coverRect
                         anchors.fill: parent
@@ -127,12 +129,17 @@ Item {
                             origin.x: coverRect.width / 2
                             origin.y: coverRect.height / 2
                             axis { x: 0; y: 1; z: 0 }
+
                             NumberAnimation on angle {
-                                from: 0; to: 360; duration: Theme.durationCover; loops: Animation.Infinite
+                                from: 0
+                                to: 360
+                                duration: Theme.durationCover
+                                loops: Animation.Infinite
                                 running: PathView.isCurrentItem && MusicViewModel.isPlaying
                             }
                         }
 
+                        // Reflection mask effect fading into background
                         Rectangle {
                             anchors.fill: parent
                             radius: Theme.radiusMd
@@ -143,12 +150,15 @@ Item {
                         }
                     }
 
+                    // Neon Glow Effect for the current item
                     MultiEffect {
                         anchors.fill: coverRect
                         source: coverRect
                         shadowEnabled: PathView.isCurrentItem
                         shadowColor: Theme.accentCyan
                         shadowBlur: 1.0
+                        shadowHorizontalOffset: 0
+                        shadowVerticalOffset: 0
                     }
 
                     MouseArea {
@@ -158,6 +168,7 @@ Item {
                 }
             }
 
+            // Loading spinner overlay (runs only while isLoading)
             ColumnLayout {
                 anchors.centerIn: parent
                 spacing: Theme.spaceMd
@@ -178,18 +189,36 @@ Item {
 
                     Item {
                         anchors.fill: parent
+                        id: spinnerArc
+                        
                         Rectangle {
-                            width: parent.width / 2
+                            width: parent.width
                             height: parent.height
+                            radius: Theme.radiusPill
                             color: "transparent"
                             border.color: Theme.accentCyan
                             border.width: 3
+                            
+                            // A hacky way to create an arc using gradients or clip, but we stick to the existing visual
+                            // By default, the old code had a visible: false rectangle that was rotated. We'll just use a small indicator.
                             clip: true
+                            Rectangle {
+                                width: parent.width / 2
+                                height: parent.height / 2
+                                color: Theme.backgroundDeepSpace
+                                anchors.top: parent.top
+                                anchors.right: parent.right
+                            }
                         }
+
                         transform: Rotation {
-                            origin.x: 32; origin.y: 32
+                            origin.x: 32
+                            origin.y: 32
                             NumberAnimation on angle {
-                                from: 0; to: 360; duration: Theme.durationSpin; loops: Animation.Infinite
+                                from: 0
+                                to: 360
+                                duration: Theme.durationSpin
+                                loops: Animation.Infinite
                                 running: MusicViewModel.isLoading
                             }
                         }
@@ -216,6 +245,7 @@ Item {
                 width: parent.width * 0.85
                 spacing: Theme.spaceSm
 
+                // 1. Track Info (Centered) & Scan Button (Right)
                 Item {
                     width: parent.width
                     height: 48
@@ -272,6 +302,7 @@ Item {
                     }
                 }
 
+                // 2. Scrubber
                 Item {
                     width: parent.width
                     height: 12
@@ -296,7 +327,9 @@ Item {
 
                             Rectangle {
                                 id: thumb
-                                width: 10; height: 10; radius: 5
+                                width: 10
+                                height: 10
+                                radius: 5
                                 color: Theme.textPrimary
                                 anchors.verticalCenter: parent.verticalCenter
                                 anchors.right: parent.right
@@ -311,39 +344,47 @@ Item {
                             }
                         }
                     }
+                    
+                    // Simple Drag Handler Alternative using MouseArea
                     MouseArea {
                         id: scrberMouse
                         anchors.fill: parent
                         property real dragX: 0
-                        onPositionChanged: {
-                            if (pressed) {
-                                dragX = mouseX
-                                MusicViewModel.seek(mouseX / Math.max(1, width))
-                            }
-                        }
                         onPressed: {
+                            root.scrubberDragging = true
                             dragX = mouseX
                             MusicViewModel.seek(mouseX / Math.max(1, width))
                         }
+                        onPositionChanged: {
+                            dragX = mouseX
+                            MusicViewModel.seek(mouseX / Math.max(1, width))
+                        }
+                        onReleased: root.scrubberDragging = false
                     }
                 }
 
+                // 3. Volume Slider
                 Row {
                     width: parent.width
                     height: 16
                     anchors.horizontalCenter: parent.horizontalCenter
                     spacing: Theme.spaceMd
 
-                    NeonIcon {
+                    Item {
                         width: 16
                         height: 16
                         anchors.verticalCenter: parent.verticalCenter
-                        source: "qrc:/qt/qml/com/showcase/resources/icons/volume.svg"
-                        colorizationColor: Theme.textSecondary
+
+                        NeonIcon {
+                            anchors.fill: parent
+                            source: "qrc:/qt/qml/com/showcase/resources/icons/volume.svg"
+                            sourceSize: Qt.size(16, 16)
+                            colorizationColor: Theme.textSecondary
+                        }
                     }
 
                     Rectangle {
-                        width: parent.width - 16 - Theme.spaceMd
+                        width: parent.width - 16 - 8
                         anchors.verticalCenter: parent.verticalCenter
                         height: 3
                         color: Theme.trackInactive
@@ -358,35 +399,43 @@ Item {
 
                         MouseArea {
                             anchors.fill: parent
-                            onPositionChanged: if (pressed) MusicViewModel.setVolume(mouseX / Math.max(1, width))
                             onPressed: MusicViewModel.setVolume(mouseX / Math.max(1, width))
+                            onPositionChanged: MusicViewModel.setVolume(mouseX / Math.max(1, width))
                         }
                     }
                 }
 
+                // 4. Media Controls
                 Row {
                     anchors.horizontalCenter: parent.horizontalCenter
                     spacing: Theme.spaceXl
 
                     NeonIconButton {
-                        width: 24; height: 24
+                        width: 24
+                        height: 24
                         anchors.verticalCenter: parent.verticalCenter
                         source: "qrc:/qt/qml/com/showcase/resources/icons/shuffle.svg"
-                        isToggle: true
+                        sourceSize: Qt.size(24, 24)
                         isActive: MusicViewModel.shuffleMode
-                        colorizationColor: Theme.textSecondary
+                        defaultColor: Theme.textSecondary
+                        activeColor: Theme.accentCyan
                         onClicked: MusicViewModel.toggleShuffle()
                     }
 
                     NeonIconButton {
-                        width: 26; height: 26
+                        width: 26
+                        height: 26
                         anchors.verticalCenter: parent.verticalCenter
                         source: "qrc:/qt/qml/com/showcase/resources/icons/prev.svg"
+                        sourceSize: Qt.size(26, 26)
+                        defaultColor: Theme.textPrimary
                         onClicked: MusicViewModel.prev()
                     }
 
                     Rectangle {
-                        width: 44; height: 44; radius: Theme.radiusLg
+                        width: 44
+                        height: 44
+                        radius: Theme.radiusLg
                         anchors.verticalCenter: parent.verticalCenter
                         color: playMouse.pressed ? Theme.accentCyan : "transparent"
                         border.color: Theme.accentCyan
@@ -396,39 +445,48 @@ Item {
                         Behavior on color { ColorAnimation { duration: Theme.durationPress } }
                         
                         NeonIcon {
-                            width: 20; height: 20
+                            width: 20
+                            height: 20
                             anchors.centerIn: parent
                             source: MusicViewModel.isPlaying ? "qrc:/qt/qml/com/showcase/resources/icons/pause.svg" : "qrc:/qt/qml/com/showcase/resources/icons/play.svg"
+                            sourceSize: Qt.size(20, 20)
                             colorizationColor: playMouse.pressed ? Theme.backgroundDeepSpace : Theme.accentCyan
                         }
+                        
                         MouseArea { id: playMouse; anchors.fill: parent; onClicked: MusicViewModel.togglePlayPause() }
                     }
 
                     NeonIconButton {
-                        width: 26; height: 26
+                        width: 26
+                        height: 26
                         anchors.verticalCenter: parent.verticalCenter
                         source: "qrc:/qt/qml/com/showcase/resources/icons/next.svg"
+                        sourceSize: Qt.size(26, 26)
+                        defaultColor: Theme.textPrimary
                         onClicked: MusicViewModel.next()
                     }
 
                     Item {
-                        width: 24; height: 24
+                        width: 24
+                        height: 24
                         anchors.verticalCenter: parent.verticalCenter
-
+                        
                         NeonIconButton {
                             anchors.fill: parent
                             source: "qrc:/qt/qml/com/showcase/resources/icons/repeat.svg"
-                            isToggle: true
-                            isActive: MusicViewModel.repeatMode !== MusicEnums.RepeatMode.Off
-                            colorizationColor: Theme.textSecondary
+                            sourceSize: Qt.size(24, 24)
+                            defaultColor: Theme.textSecondary
                             activeColor: MusicViewModel.repeatMode === MusicEnums.RepeatMode.One ? Theme.warningRed : Theme.accentCyan
+                            isActive: MusicViewModel.repeatMode !== MusicEnums.RepeatMode.Off
                             onClicked: MusicViewModel.cycleRepeat()
                         }
                         
                         Rectangle {
                             anchors.right: parent.right
                             anchors.bottom: parent.bottom
-                            width: 10; height: 10; radius: 5
+                            width: 10
+                            height: 10
+                            radius: 5
                             color: Theme.warningRed
                             visible: MusicViewModel.repeatMode === MusicEnums.RepeatMode.One
                         }
@@ -438,14 +496,7 @@ Item {
         }
     }
 
-    // Declarative Error Toast
-    Timer {
-        id: toastHideTimer
-        interval: 3000
-        running: MusicViewModel.lastError !== ""
-        onTriggered: MusicViewModel.clearError()
-    }
-
+    // Error Toast (driven by declarative binding to MusicViewModel.lastError)
     Rectangle {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom
@@ -465,6 +516,13 @@ Item {
             font.family: Theme.fontMain
             font.pixelSize: Theme.textXs
             elide: Text.ElideRight
+        }
+        
+        Timer {
+            interval: 3000
+            running: MusicViewModel.lastError !== ""
+            repeat: false
+            onTriggered: MusicViewModel.clearError()
         }
     }
 }

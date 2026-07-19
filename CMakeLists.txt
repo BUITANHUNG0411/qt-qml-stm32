@@ -41,6 +41,10 @@ qt_add_qml_module(${PROJECT_NAME}
         qml/components/GlowingText.qml
         qml/components/NeonTickGauge.qml
         qml/components/MusicPlayer.qml
+        qml/components/EnergyBlocks.qml
+        qml/components/GlassPanel.qml
+        qml/components/NeonIcon.qml
+        qml/components/NeonIconButton.qml
         qml/screens/DashboardScreen.qml
     RESOURCES
         resources/icons/play.svg

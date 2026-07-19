@@ -13,6 +13,7 @@ Item {
     property bool isWarning: false
     property color gaugeColor: Theme.accentCyan
     property color warningColor: Theme.warningRed
+    property color effectiveColor: isWarning ? warningColor : gaugeColor
 
     // Cấu hình số lượng vạch tick
     property int tickCount: 80 
@@ -40,7 +41,7 @@ Item {
                 centerRadius: root.width / 2.2
                 GradientStop { 
                     position: 0.0; 
-                    color: root.isWarning ? Qt.rgba(root.warningColor.r, root.warningColor.g, root.warningColor.b, 0.2) : Qt.rgba(root.gaugeColor.r, root.gaugeColor.g, root.gaugeColor.b, 0.2) 
+                    color: Qt.rgba(root.effectiveColor.r, root.effectiveColor.g, root.effectiveColor.b, 0.2) 
                 }
                 GradientStop { position: 1.0; color: "transparent" }
             }
@@ -73,45 +74,53 @@ Item {
                 property bool isMajor: index % root.majorTickInterval === 0
                 property bool isRedline: root.redlineValue > 0 && tickValue >= root.redlineValue
 
-                property real tickInset: Theme.spaceXXl + Theme.spaceLg
-
-                Rectangle {
-                    property color activeColor: parent.isRedline ? root.warningColor : (root.isWarning ? root.warningColor : root.gaugeColor)
+                Item {
+                    anchors.centerIn: parent
+                    width: root.width - Theme.spaceXXl
+                    height: width
                     
-                    width: parent.isMajor ? root.width * 0.04 : root.width * 0.02
-                    height: parent.isMajor ? 4 : 2
-                    
-                    color: parent.isIlluminated ? (parent.isRedline ? Theme.tickLitMajor : Theme.tickLitMinor) : 
-                           (parent.isMajor ? Theme.tickDimMajor : Theme.tickDimMinor)
-                    opacity: parent.isIlluminated ? 1.0 : (parent.isMajor ? 0.8 : 0.4)
-                    
-                    anchors.verticalCenter: parent.verticalCenter
-                    anchors.left: parent.left
-                    anchors.leftMargin: root.width / 2 + tickInset - width
-                    
-                    Behavior on opacity { NumberAnimation { duration: Theme.durationTick } }
-                    Behavior on color { ColorAnimation { duration: Theme.durationTick } }
+                    Rectangle {
+                        property color activeColor: parent.parent.isRedline ? root.warningColor : root.effectiveColor
+                        
+                        width: parent.parent.isMajor ? root.width * 0.04 : root.width * 0.02
+                        height: parent.parent.isMajor ? 4 : 2
+                        
+                        color: parent.parent.isIlluminated ? (parent.parent.isRedline ? Theme.tickLitMajor : Theme.tickLitMinor) : 
+                               (parent.parent.isMajor ? Theme.tickDimMajor : Theme.tickDimMinor)
+                        opacity: parent.parent.isIlluminated ? 1.0 : (parent.parent.isMajor ? 0.8 : 0.4)
+                        
+                        anchors.right: parent.right
+                        anchors.verticalCenter: parent.verticalCenter
+                        
+                        Behavior on opacity { NumberAnimation { duration: Theme.durationTick } }
+                        Behavior on color { ColorAnimation { duration: Theme.durationTick } }
+                    }
                 }
 
                 // Chữ số nhãn
-                Text {
-                    visible: parent.isMajor
-                    text: parent.displayTickValue
-                    color: parent.isIlluminated ? Theme.textPrimary : Theme.textSecondary
-                    font.family: Theme.fontMain
-                    font.pixelSize: root.width * 0.045
-                    opacity: parent.isIlluminated ? 1.0 : 0.4
+                Item {
+                    anchors.centerIn: parent
+                    width: root.width - (Theme.spaceXXl * 2.5)
+                    height: width
                     
-                    anchors.verticalCenter: parent.verticalCenter
-                    anchors.left: parent.left
-                    anchors.leftMargin: root.width / 2 + tickInset + Theme.spaceXXl - width / 2
+                    Text {
+                        visible: parent.parent.isMajor
+                        text: parent.parent.displayTickValue
+                        color: parent.parent.isIlluminated ? Theme.textPrimary : Theme.textSecondary
+                        font.family: Theme.fontMain
+                        font.pixelSize: root.width * 0.045
+                        opacity: parent.parent.isIlluminated ? 1.0 : 0.4
+                        
+                        anchors.right: parent.right
+                        anchors.verticalCenter: parent.verticalCenter
 
-                    // Giữ chữ luôn thẳng đứng
-                    rotation: -(135 + (index / root.tickCount) * 270)
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
-                    
-                    Behavior on opacity { NumberAnimation { duration: Theme.durationTick } }
+                        // Giữ chữ luôn thẳng đứng
+                        rotation: -(135 + (index / root.tickCount) * 270)
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                        
+                        Behavior on opacity { NumberAnimation { duration: Theme.durationTick } }
+                    }
                 }
             }
         }
@@ -122,7 +131,7 @@ Item {
         anchors.fill: tickLayer
         source: tickLayer
         shadowEnabled: true
-        shadowColor: root.isWarning ? root.warningColor : root.gaugeColor
+        shadowColor: root.effectiveColor
         shadowBlur: 1.0 // Blur tối đa để tạo vệt sáng
         shadowHorizontalOffset: 0
         shadowVerticalOffset: 0

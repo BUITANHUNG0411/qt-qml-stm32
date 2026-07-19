@@ -27,11 +27,11 @@ class MusicPlayerViewModel : public QAbstractListModel
     Q_PROPERTY(bool isPlaying READ isPlaying NOTIFY isPlayingChanged)
     Q_PROPERTY(float progress READ progress NOTIFY progressChanged)
     Q_PROPERTY(bool isScanning READ isScanning NOTIFY isScanningChanged)
-    Q_PROPERTY(QString lastError READ lastError NOTIFY lastErrorChanged)
 
     // ==== New properties (Music Player Upgrade - Step 1) ====
     Q_PROPERTY(float volume READ volume WRITE setVolume NOTIFY volumeChanged)
     Q_PROPERTY(bool isLoading READ isLoading NOTIFY isLoadingChanged)
+    Q_PROPERTY(QString lastError READ lastError NOTIFY lastErrorChanged)
     Q_PROPERTY(bool shuffleMode READ shuffleMode WRITE setShuffleMode NOTIFY shuffleModeChanged)
     Q_PROPERTY(MusicEnums::PlaybackState playbackState READ playbackState NOTIFY playbackStateChanged)
     Q_PROPERTY(MusicEnums::RepeatMode repeatMode READ repeatMode WRITE setRepeatMode NOTIFY repeatModeChanged)
@@ -61,11 +61,11 @@ public:
     bool isPlaying() const;
     float progress() const;
     bool isScanning() const;
-    QString lastError() const;
 
     // ==== New getters (Step 1) ====
     float volume() const;
     bool isLoading() const;
+    QString lastError() const;
     bool shuffleMode() const;
     MusicEnums::PlaybackState playbackState() const;
     MusicEnums::RepeatMode repeatMode() const;
@@ -83,9 +83,9 @@ public slots:
     // ==== New Q_INVOKABLEs / slots (Step 1) ====
     Q_INVOKABLE void seek(float ratio);
     Q_INVOKABLE void seekMs(qint64 ms);
-    Q_INVOKABLE void clearError();
     Q_INVOKABLE void toggleShuffle();
     Q_INVOKABLE void cycleRepeat();
+    Q_INVOKABLE void clearError();
     Q_INVOKABLE void saveResume();
 
     void setVolume(float value);
@@ -114,12 +114,12 @@ signals:
     void volumeChanged();
     void isLoadingChanged();
     void shuffleModeChanged();
+    void lastErrorChanged();
     void repeatModeChanged();
     void playbackStateChanged();
     void durationChanged();
     void positionChanged();
     void playbackError(const QString& message);
-    void lastErrorChanged();
 
 private:
     void updatePlaybackState();
@@ -136,6 +136,7 @@ private:
     float m_volume = 1.0f;
     bool m_isLoading = false;
     bool m_shuffleMode = false;
+    QString m_lastError = "";
     MusicEnums::RepeatMode m_repeatMode = MusicEnums::RepeatMode::Off;
     MusicEnums::PlaybackState m_playbackState = MusicEnums::PlaybackState::Stopped;
     qint64 m_duration = 0;
@@ -144,7 +145,6 @@ private:
     int m_lastIndex = -1;
     qint64 m_lastPos = 0;
     bool m_resumePending = false;
-    QString m_lastError;
 
     QThread m_scannerThread;
     MusicScanner* m_scanner;

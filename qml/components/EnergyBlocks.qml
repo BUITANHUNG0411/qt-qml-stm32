@@ -1,25 +1,26 @@
 import QtQuick
+import QtQuick.Effects
 import com.showcase
 
-Row {
+Item {
     id: root
-    property real value: 0
-    property real maxValue: 100
-    property int blockCount: 20
+    property int count: 20
+    property int activeCount: 15
     property color activeColor: Theme.accentCyan
-    property color warningColor: Theme.warningRed
-    property real warningThreshold: 20
-    property bool invertWarning: false // If true, warns when value > threshold
-    
-    spacing: Theme.spaceXs
-    Repeater {
-        model: root.blockCount
-        Rectangle {
-            width: Theme.spaceMd; height: Theme.spaceMd; radius: Theme.radiusSm / 4
-            property bool isActive: index < (root.value / (root.maxValue / root.blockCount))
-            property bool isWarnState: root.invertWarning ? (root.value > root.warningThreshold) : (root.value < root.warningThreshold)
-            color: isActive ? (isWarnState ? root.warningColor : root.activeColor) : Theme.textSecondary
-            opacity: isActive ? 1.0 : 0.3
+    property color inactiveColor: Theme.textSecondary
+    property color dangerColor: Theme.warningRed
+    property int dangerThreshold: 4
+
+    Row {
+        spacing: Theme.spaceXs
+        Repeater {
+            model: root.count
+            Rectangle {
+                width: 8; height: 8; radius: 2
+                property bool isActive: index < root.activeCount
+                color: isActive ? (root.activeCount < root.dangerThreshold ? root.dangerColor : root.activeColor) : root.inactiveColor
+                opacity: isActive ? 1.0 : 0.3
+            }
         }
     }
 }

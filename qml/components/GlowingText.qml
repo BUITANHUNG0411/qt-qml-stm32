@@ -6,6 +6,7 @@ Item {
     id: root
     property alias text: label.text
     property alias font: label.font
+    property alias color: label.color
     property color glowColor: Theme.accentCyan
     property real glowRadius: Theme.radiusSm
     property real glowSpread: 0.2

@@ -63,7 +63,7 @@ MusicPlayerViewModel::~MusicPlayerViewModel()
 int MusicPlayerViewModel::rowCount(const QModelIndex &parent) const
 {
     if (parent.isValid()) return 0;
-    return m_songs.count();
+    return static_cast<int>(m_songs.count());
 }
 
 QVariant MusicPlayerViewModel::data(const QModelIndex &index, int role) const
@@ -131,11 +131,6 @@ bool MusicPlayerViewModel::isScanning() const
     return m_isScanning;
 }
 
-QString MusicPlayerViewModel::lastError() const
-{
-    return m_lastError;
-}
-
 // ==== New getters (Step 1) ====
 float MusicPlayerViewModel::volume() const
 {
@@ -145,6 +140,11 @@ float MusicPlayerViewModel::volume() const
 bool MusicPlayerViewModel::isLoading() const
 {
     return m_isLoading;
+}
+
+QString MusicPlayerViewModel::lastError() const
+{
+    return m_lastError;
 }
 
 bool MusicPlayerViewModel::shuffleMode() const
@@ -214,19 +214,11 @@ void MusicPlayerViewModel::cycleRepeat()
     setRepeatMode(next);
 }
 
-void MusicPlayerViewModel::clearError()
-{
-    if (!m_lastError.isEmpty()) {
-        m_lastError.clear();
-        emit lastErrorChanged();
-    }
-}
-
 void MusicPlayerViewModel::seek(float ratio)
 {
     if (m_player->duration() <= 0) return; // no-op when no duration
     float clamped = std::clamp(ratio, 0.0f, 1.0f);
-    m_player->setPosition(static_cast<qint64>(m_player->duration() * clamped));
+    m_player->setPosition(static_cast<qint64>(static_cast<float>(m_player->duration()) * clamped));
 }
 
 void MusicPlayerViewModel::seekMs(qint64 ms)
@@ -239,6 +231,14 @@ void MusicPlayerViewModel::seekMs(qint64 ms)
 void MusicPlayerViewModel::saveResume()
 {
     saveResumeNow();
+}
+
+void MusicPlayerViewModel::clearError()
+{
+    if (m_lastError != "") {
+        m_lastError = "";
+        emit lastErrorChanged();
+    }
 }
 
 // ==== Existing slots ====
@@ -276,7 +276,7 @@ void MusicPlayerViewModel::next()
     if (m_shuffleMode) {
         nextIdx = nextShuffleIndex();
     } else {
-        nextIdx = (m_currentIndex + 1) % m_songs.count();
+        nextIdx = (m_currentIndex + 1) % static_cast<int>(m_songs.count());
     }
     setCurrentIndex(nextIdx);
 }
@@ -284,7 +284,7 @@ void MusicPlayerViewModel::next()
 void MusicPlayerViewModel::prev()
 {
     if (m_songs.isEmpty()) return;
-    int prevIdx = (m_currentIndex - 1 < 0) ? m_songs.count() - 1 : m_currentIndex - 1;
+    int prevIdx = (m_currentIndex - 1 < 0) ? static_cast<int>(m_songs.count()) - 1 : m_currentIndex - 1;
     setCurrentIndex(prevIdx);
 }
 
@@ -307,7 +307,7 @@ void MusicPlayerViewModel::scanLibrary()
 
 void MusicPlayerViewModel::onSongFound(const SongData& song)
 {
-    beginInsertRows(QModelIndex(), m_songs.count(), m_songs.count());
+    beginInsertRows(QModelIndex(), static_cast<int>(m_songs.count()), static_cast<int>(m_songs.count()));
     m_songs.append(song);
     endInsertRows();
 }
@@ -338,7 +338,7 @@ void MusicPlayerViewModel::onPositionChanged(qint64 position)
     emit positionChanged();
 
     if (m_player->duration() > 0) {
-        m_progress = static_cast<float>(position) / m_player->duration();
+        m_progress = static_cast<float>(position) / static_cast<float>(m_player->duration());
         emit progressChanged();
     }
 
@@ -358,7 +358,7 @@ void MusicPlayerViewModel::onDurationChanged(qint64 duration)
     }
 
     if (duration > 0) {
-        m_progress = static_cast<float>(m_player->position()) / duration;
+        m_progress = static_cast<float>(m_player->position()) / static_cast<float>(duration);
         emit progressChanged();
     }
 }
@@ -401,9 +401,10 @@ void MusicPlayerViewModel::onMediaStatusChanged(QMediaPlayer::MediaStatus status
 
 void MusicPlayerViewModel::onErrorOccurred(QMediaPlayer::Error /*error*/, const QString &errorString)
 {
-    m_lastError = errorString;
+    QString msg = "Playback error: " + errorString;
+    m_lastError = msg;
     emit lastErrorChanged();
-    emit playbackError(errorString);
+    emit playbackError(msg);
 }
 
 void MusicPlayerViewModel::onPeriodicSaveTimeout()
@@ -452,7 +453,7 @@ int MusicPlayerViewModel::nextShuffleIndex() const
     if (m_songs.count() <= 1) return m_currentIndex;
     int candidate;
     do {
-        candidate = QRandomGenerator::global()->bounded(m_songs.count());
+        candidate = QRandomGenerator::global()->bounded(static_cast<int>(m_songs.count()));
     } while (candidate == m_currentIndex);
     return candidate;
 }
