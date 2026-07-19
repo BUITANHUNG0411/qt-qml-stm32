@@ -4,7 +4,19 @@
 #include <QThread>
 #include <QMediaPlayer>
 #include <QAudioOutput>
+#include <QTimer>
+#include <QSettings>
 #include "../services/MusicScanner.h"
+
+// Namespace-scoped enums exposed to QML via Q_NAMESPACE.
+namespace MusicEnums {
+Q_NAMESPACE
+enum class PlaybackState { Stopped, Playing, Paused, Loading };
+Q_ENUM_NS(PlaybackState)
+
+enum class RepeatMode { Off, One, All };
+Q_ENUM_NS(RepeatMode)
+}
 
 class MusicPlayerViewModel : public QAbstractListModel
 {
@@ -13,6 +25,15 @@ class MusicPlayerViewModel : public QAbstractListModel
     Q_PROPERTY(bool isPlaying READ isPlaying NOTIFY isPlayingChanged)
     Q_PROPERTY(float progress READ progress NOTIFY progressChanged)
     Q_PROPERTY(bool isScanning READ isScanning NOTIFY isScanningChanged)
+
+    // ==== New properties (Music Player Upgrade - Step 1) ====
+    Q_PROPERTY(float volume READ volume WRITE setVolume NOTIFY volumeChanged)
+    Q_PROPERTY(bool isLoading READ isLoading NOTIFY isLoadingChanged)
+    Q_PROPERTY(bool shuffleMode READ shuffleMode WRITE setShuffleMode NOTIFY shuffleModeChanged)
+    Q_PROPERTY(MusicEnums::PlaybackState playbackState READ playbackState NOTIFY playbackStateChanged)
+    Q_PROPERTY(MusicEnums::RepeatMode repeatMode READ repeatMode WRITE setRepeatMode NOTIFY repeatModeChanged)
+    Q_PROPERTY(qint64 duration READ duration NOTIFY durationChanged)
+    Q_PROPERTY(qint64 positionMs READ positionMs NOTIFY positionChanged)
 
 public:
     enum SongRoles {
@@ -37,6 +58,15 @@ public:
     float progress() const;
     bool isScanning() const;
 
+    // ==== New getters (Step 1) ====
+    float volume() const;
+    bool isLoading() const;
+    bool shuffleMode() const;
+    MusicEnums::PlaybackState playbackState() const;
+    MusicEnums::RepeatMode repeatMode() const;
+    qint64 duration() const;
+    qint64 positionMs() const;
+
 public slots:
     void play(int index = -1);
     void pause();
@@ -45,11 +75,27 @@ public slots:
     void prev();
     void scanLibrary();
 
+    // ==== New Q_INVOKABLEs / slots (Step 1) ====
+    Q_INVOKABLE void seek(float ratio);
+    Q_INVOKABLE void seekMs(qint64 ms);
+    Q_INVOKABLE void toggleShuffle();
+    Q_INVOKABLE void cycleRepeat();
+    Q_INVOKABLE void saveResume();
+
+    void setVolume(float value);
+    void setShuffleMode(bool enabled);
+    void setRepeatMode(MusicEnums::RepeatMode mode);
+
 private slots:
     void onSongFound(const SongData& song);
     void onScanFinished();
     void onPositionChanged(qint64 position);
     void onDurationChanged(qint64 duration);
+
+    // ==== New internal slots (Step 1) ====
+    void onMediaStatusChanged(QMediaPlayer::MediaStatus status);
+    void onErrorOccurred(QMediaPlayer::Error error, const QString &errorString);
+    void onPeriodicSaveTimeout();
 
 signals:
     void currentIndexChanged();
@@ -58,15 +104,46 @@ signals:
     void isScanningChanged();
     void requestScan(const QString& path);
 
+    // ==== New signals (Step 1) ====
+    void volumeChanged();
+    void isLoadingChanged();
+    void shuffleModeChanged();
+    void repeatModeChanged();
+    void playbackStateChanged();
+    void durationChanged();
+    void positionChanged();
+    void playbackError(const QString& message);
+
 private:
+    void updatePlaybackState();
+    void saveResumeNow();
+    void scheduleResumeSave();
+    int nextShuffleIndex() const;
+
     QList<SongData> m_songs;
     int m_currentIndex = -1;
     bool m_isScanning = false;
     float m_progress = 0.0f;
+
+    // ==== New private state (Step 1) ====
+    float m_volume = 1.0f;
+    bool m_isLoading = false;
+    bool m_shuffleMode = false;
+    MusicEnums::RepeatMode m_repeatMode = MusicEnums::RepeatMode::Off;
+    MusicEnums::PlaybackState m_playbackState = MusicEnums::PlaybackState::Stopped;
+    qint64 m_duration = 0;
+    qint64 m_positionMs = 0;
+    qint64 m_lastSavedPosition = 0;
+    int m_lastIndex = -1;
+    qint64 m_lastPos = 0;
+    bool m_resumePending = false;
 
     QThread m_scannerThread;
     MusicScanner* m_scanner;
 
     QMediaPlayer* m_player;
     QAudioOutput* m_audioOutput;
+
+    QTimer* m_saveTimer;
+    QSettings m_settings;
 };

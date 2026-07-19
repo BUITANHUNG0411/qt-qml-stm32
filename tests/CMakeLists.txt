@@ -19,3 +19,22 @@ target_link_libraries(tst_viewmodels
 
 # Add it to CTest
 add_test(NAME tst_viewmodels COMMAND tst_viewmodels)
+
+# --- Music playback tests ---
+qt_add_executable(tst_music_playback
+    tst_music_playback.cpp
+    ../src/viewmodels/MusicPlayerViewModel.cpp
+    ../src/services/MusicScanner.cpp
+)
+
+target_include_directories(tst_music_playback PRIVATE ../src)
+
+target_link_libraries(tst_music_playback
+    PRIVATE
+    Qt6::Core
+    Qt6::Qml
+    Qt6::Test
+    Qt6::Multimedia
+)
+
+add_test(NAME tst_music_playback COMMAND tst_music_playback)

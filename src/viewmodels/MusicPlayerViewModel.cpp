@@ -2,9 +2,19 @@
 #include <QStandardPaths>
 #include <QDebug>
 #include <QUrl>
+#include <QRandomGenerator>
+#include <algorithm>
+
+namespace {
+constexpr int kSaveIntervalMs = 1000;
+constexpr qint64 kSavePositionDeltaMs = 250;
+constexpr char kOrgName[] = "QtStmAutomotiveSimulator";
+constexpr char kAppName[] = "QtStmAutomotiveSimulator";
+}
 
 MusicPlayerViewModel::MusicPlayerViewModel(QObject *parent)
-    : QAbstractListModel(parent), m_scanner(new MusicScanner())
+    : QAbstractListModel(parent), m_scanner(new MusicScanner()),
+      m_settings(QSettings::IniFormat, QSettings::UserScope, kOrgName, kAppName)
 {
     // Setup Audio Player
     m_player = new QMediaPlayer(this);
@@ -14,6 +24,22 @@ MusicPlayerViewModel::MusicPlayerViewModel(QObject *parent)
     connect(m_player, &QMediaPlayer::playingChanged, this, &MusicPlayerViewModel::isPlayingChanged);
     connect(m_player, &QMediaPlayer::positionChanged, this, &MusicPlayerViewModel::onPositionChanged);
     connect(m_player, &QMediaPlayer::durationChanged, this, &MusicPlayerViewModel::onDurationChanged);
+    // New: media status drives isLoading + auto-next + playbackState
+    connect(m_player, &QMediaPlayer::mediaStatusChanged, this, &MusicPlayerViewModel::onMediaStatusChanged);
+    connect(m_player, &QMediaPlayer::errorOccurred, this, &MusicPlayerViewModel::onErrorOccurred);
+
+    // Throttled resume save (1-second single-shot)
+    m_saveTimer = new QTimer(this);
+    m_saveTimer->setSingleShot(true);
+    m_saveTimer->setInterval(kSaveIntervalMs);
+    connect(m_saveTimer, &QTimer::timeout, this, &MusicPlayerViewModel::onPeriodicSaveTimeout);
+
+    // Restore resume point
+    m_lastIndex = m_settings.value("music/lastIndex", -1).toInt();
+    m_lastPos = m_settings.value("music/lastPositionMs", 0).toLongLong();
+
+    // Apply initial volume
+    m_audioOutput->setVolume(m_volume);
 
     // Setup Scanner Thread
     m_scanner->moveToThread(&m_scannerThread);
@@ -28,6 +54,7 @@ MusicPlayerViewModel::MusicPlayerViewModel(QObject *parent)
 
 MusicPlayerViewModel::~MusicPlayerViewModel()
 {
+    saveResumeNow();
     m_scannerThread.requestInterruption();
     m_scannerThread.quit();
     m_scannerThread.wait();
@@ -77,11 +104,11 @@ void MusicPlayerViewModel::setCurrentIndex(int index)
     if (index >= 0 && index < m_songs.count()) {
         m_currentIndex = index;
         emit currentIndexChanged();
-        
+
         // Reset progress when changing track
         m_progress = 0.0f;
         emit progressChanged();
-        
+
         m_player->setSource(QUrl::fromLocalFile(m_songs[m_currentIndex].filePath));
         m_player->play();
     }
@@ -102,6 +129,104 @@ bool MusicPlayerViewModel::isScanning() const
     return m_isScanning;
 }
 
+// ==== New getters (Step 1) ====
+float MusicPlayerViewModel::volume() const
+{
+    return m_volume;
+}
+
+bool MusicPlayerViewModel::isLoading() const
+{
+    return m_isLoading;
+}
+
+bool MusicPlayerViewModel::shuffleMode() const
+{
+    return m_shuffleMode;
+}
+
+MusicEnums::PlaybackState MusicPlayerViewModel::playbackState() const
+{
+    return m_playbackState;
+}
+
+MusicEnums::RepeatMode MusicPlayerViewModel::repeatMode() const
+{
+    return m_repeatMode;
+}
+
+qint64 MusicPlayerViewModel::duration() const
+{
+    return m_duration;
+}
+
+qint64 MusicPlayerViewModel::positionMs() const
+{
+    return m_positionMs;
+}
+
+// ==== New setters / invokables (Step 1) ====
+void MusicPlayerViewModel::setVolume(float value)
+{
+    float clamped = std::clamp(value, 0.0f, 1.0f);
+    if (m_volume == clamped) return;
+    m_volume = clamped;
+    m_audioOutput->setVolume(m_volume);
+    emit volumeChanged();
+}
+
+void MusicPlayerViewModel::setShuffleMode(bool enabled)
+{
+    if (m_shuffleMode == enabled) return;
+    m_shuffleMode = enabled;
+    emit shuffleModeChanged();
+}
+
+void MusicPlayerViewModel::toggleShuffle()
+{
+    setShuffleMode(!m_shuffleMode);
+}
+
+void MusicPlayerViewModel::setRepeatMode(MusicEnums::RepeatMode mode)
+{
+    if (m_repeatMode == mode) return;
+    m_repeatMode = mode;
+    emit repeatModeChanged();
+    updatePlaybackState();
+}
+
+void MusicPlayerViewModel::cycleRepeat()
+{
+    MusicEnums::RepeatMode next;
+    switch (m_repeatMode) {
+        case MusicEnums::RepeatMode::Off: next = MusicEnums::RepeatMode::One; break;
+        case MusicEnums::RepeatMode::One: next = MusicEnums::RepeatMode::All; break;
+        case MusicEnums::RepeatMode::All: next = MusicEnums::RepeatMode::Off; break;
+        default: next = MusicEnums::RepeatMode::Off; break;
+    }
+    setRepeatMode(next);
+}
+
+void MusicPlayerViewModel::seek(float ratio)
+{
+    if (m_player->duration() <= 0) return; // no-op when no duration
+    float clamped = std::clamp(ratio, 0.0f, 1.0f);
+    m_player->setPosition(static_cast<qint64>(m_player->duration() * clamped));
+}
+
+void MusicPlayerViewModel::seekMs(qint64 ms)
+{
+    if (m_player->duration() <= 0) return;
+    qint64 clamped = std::clamp(ms, static_cast<qint64>(0), m_player->duration());
+    m_player->setPosition(clamped);
+}
+
+void MusicPlayerViewModel::saveResume()
+{
+    saveResumeNow();
+}
+
+// ==== Existing slots ====
 void MusicPlayerViewModel::play(int index)
 {
     if (index != -1 && index != m_currentIndex) {
@@ -132,7 +257,12 @@ void MusicPlayerViewModel::togglePlayPause()
 void MusicPlayerViewModel::next()
 {
     if (m_songs.isEmpty()) return;
-    int nextIdx = (m_currentIndex + 1) % m_songs.count();
+    int nextIdx;
+    if (m_shuffleMode) {
+        nextIdx = nextShuffleIndex();
+    } else {
+        nextIdx = (m_currentIndex + 1) % m_songs.count();
+    }
     setCurrentIndex(nextIdx);
 }
 
@@ -146,7 +276,7 @@ void MusicPlayerViewModel::prev()
 void MusicPlayerViewModel::scanLibrary()
 {
     if (m_isScanning) return;
-    
+
     beginResetModel();
     m_songs.clear();
     m_currentIndex = -1;
@@ -155,7 +285,7 @@ void MusicPlayerViewModel::scanLibrary()
 
     m_isScanning = true;
     emit isScanningChanged();
-    
+
     QString path = QStandardPaths::writableLocation(QStandardPaths::MusicLocation);
     emit requestScan(path);
 }
@@ -171,20 +301,141 @@ void MusicPlayerViewModel::onScanFinished()
 {
     m_isScanning = false;
     emit isScanningChanged();
+
+    // Restore resume point (set source only, do NOT auto-play)
+    if (m_lastIndex >= 0 && m_lastIndex < m_songs.count()) {
+        m_currentIndex = m_lastIndex;
+        emit currentIndexChanged();
+        m_progress = 0.0f;
+        emit progressChanged();
+        m_player->setSource(QUrl::fromLocalFile(m_songs[m_currentIndex].filePath));
+        // Mark resume pending so we can seek once duration is known
+        if (m_lastPos > 0) {
+            m_resumePending = true;
+        }
+        updatePlaybackState();
+    }
 }
 
 void MusicPlayerViewModel::onPositionChanged(qint64 position)
 {
+    m_positionMs = position;
+    emit positionChanged();
+
     if (m_player->duration() > 0) {
         m_progress = static_cast<float>(position) / m_player->duration();
         emit progressChanged();
     }
+
+    scheduleResumeSave();
 }
 
 void MusicPlayerViewModel::onDurationChanged(qint64 duration)
 {
+    m_duration = duration;
+    emit durationChanged();
+
+    // Apply pending resume seek once we know the duration
+    if (m_resumePending && duration > 0) {
+        m_resumePending = false;
+        qint64 clamped = std::clamp(m_lastPos, static_cast<qint64>(0), duration);
+        m_player->setPosition(clamped);
+    }
+
     if (duration > 0) {
         m_progress = static_cast<float>(m_player->position()) / duration;
         emit progressChanged();
     }
+}
+
+// ==== New internal slots (Step 1) ====
+void MusicPlayerViewModel::onMediaStatusChanged(QMediaPlayer::MediaStatus status)
+{
+    bool loading = (status == QMediaPlayer::LoadingMedia
+                    || status == QMediaPlayer::BufferingMedia
+                    || status == QMediaPlayer::StalledMedia);
+    if (loading != m_isLoading) {
+        m_isLoading = loading;
+        emit isLoadingChanged();
+    }
+
+    if (status == QMediaPlayer::EndOfMedia) {
+        switch (m_repeatMode) {
+            case MusicEnums::RepeatMode::One:
+                if (m_currentIndex >= 0) {
+                    m_player->setPosition(0);
+                    m_player->play();
+                }
+                break;
+            case MusicEnums::RepeatMode::All:
+                next();
+                break;
+            case MusicEnums::RepeatMode::Off:
+            default:
+                if (m_currentIndex >= 0 && m_currentIndex < m_songs.count() - 1) {
+                    next();
+                } else {
+                    m_player->pause();
+                }
+                break;
+        }
+    }
+
+    updatePlaybackState();
+}
+
+void MusicPlayerViewModel::onErrorOccurred(QMediaPlayer::Error /*error*/, const QString &errorString)
+{
+    emit playbackError(errorString);
+}
+
+void MusicPlayerViewModel::onPeriodicSaveTimeout()
+{
+    saveResumeNow();
+}
+
+// ==== New private helpers (Step 1) ====
+void MusicPlayerViewModel::updatePlaybackState()
+{
+    MusicEnums::PlaybackState newState;
+    if (m_isLoading) {
+        newState = MusicEnums::PlaybackState::Loading;
+    } else if (m_player->isPlaying()) {
+        newState = MusicEnums::PlaybackState::Playing;
+    } else if (m_player->playbackState() == QMediaPlayer::PausedState) {
+        newState = MusicEnums::PlaybackState::Paused;
+    } else {
+        newState = MusicEnums::PlaybackState::Stopped;
+    }
+
+    if (newState != m_playbackState) {
+        m_playbackState = newState;
+        emit playbackStateChanged();
+    }
+}
+
+void MusicPlayerViewModel::saveResumeNow()
+{
+    m_settings.setValue("music/lastIndex", m_currentIndex);
+    m_settings.setValue("music/lastPositionMs", m_player ? m_player->position() : m_positionMs);
+    m_settings.sync();
+    m_lastSavedPosition = m_player ? m_player->position() : m_positionMs;
+}
+
+void MusicPlayerViewModel::scheduleResumeSave()
+{
+    qint64 cur = m_player ? m_player->position() : m_positionMs;
+    if (std::abs(cur - m_lastSavedPosition) >= kSavePositionDeltaMs) {
+        m_saveTimer->start();
+    }
+}
+
+int MusicPlayerViewModel::nextShuffleIndex() const
+{
+    if (m_songs.count() <= 1) return m_currentIndex;
+    int candidate;
+    do {
+        candidate = QRandomGenerator::global()->bounded(m_songs.count());
+    } while (candidate == m_currentIndex);
+    return candidate;
 }

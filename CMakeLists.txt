@@ -47,6 +47,9 @@ qt_add_qml_module(${PROJECT_NAME}
         resources/icons/pause.svg
         resources/icons/next.svg
         resources/icons/prev.svg
+        resources/icons/shuffle.svg
+        resources/icons/repeat.svg
+        resources/icons/volume.svg
     SOURCES
         src/viewmodels/VehicleStatusViewModel.h
         src/viewmodels/VehicleStatusViewModel.cpp
