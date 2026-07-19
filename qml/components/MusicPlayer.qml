@@ -272,8 +272,10 @@ Item {
 
                 // Scrubber (Progress Bar wrapped in MouseArea)
                 Item {
-                    Layout.fillWidth: true
+                    Layout.fillWidth: false
+                    Layout.preferredWidth: root.width * 0.6
                     Layout.preferredHeight: 10
+                    Layout.alignment: Qt.AlignHCenter
 
                     Rectangle {
                         anchors.verticalCenter: parent.verticalCenter
@@ -333,8 +335,10 @@ Item {
 
                 // Volume Slider
                 Item {
-                    Layout.fillWidth: true
+                    Layout.fillWidth: false
+                    Layout.preferredWidth: root.width * 0.6
                     Layout.preferredHeight: 14
+                    Layout.alignment: Qt.AlignHCenter
 
                     Image {
                         id: volIcon
