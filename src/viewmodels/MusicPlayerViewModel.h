@@ -6,11 +6,13 @@
 #include <QAudioOutput>
 #include <QTimer>
 #include <QSettings>
+#include <qqml.h>
 #include "../services/MusicScanner.h"
 
 // Namespace-scoped enums exposed to QML via Q_NAMESPACE.
 namespace MusicEnums {
 Q_NAMESPACE
+QML_ELEMENT
 enum class PlaybackState { Stopped, Playing, Paused, Loading };
 Q_ENUM_NS(PlaybackState)
 

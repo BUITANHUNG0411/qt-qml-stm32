@@ -496,7 +496,7 @@ Item {
                     Item {
                         width: 24
                         height: 24
-                        opacity: MusicViewModel.repeatMode === MusicViewModel.RepeatMode.Off ? 0.4 : 1.0
+                        opacity: MusicViewModel.repeatMode === MusicEnums.RepeatMode.Off ? 0.4 : 1.0
                         Behavior on opacity { NumberAnimation { duration: Theme.durationFast } }
 
                         Image {
@@ -510,9 +510,9 @@ Item {
                             anchors.fill: repeatIcon
                             source: repeatIcon
                             colorization: 1.0
-                            colorizationColor: MusicViewModel.repeatMode === MusicViewModel.RepeatMode.Off
+                            colorizationColor: MusicViewModel.repeatMode === MusicEnums.RepeatMode.Off
                                 ? Theme.textSecondary
-                                : (MusicViewModel.repeatMode === MusicViewModel.RepeatMode.One ? Theme.warningRed : Theme.accentCyan)
+                                : (MusicViewModel.repeatMode === MusicEnums.RepeatMode.One ? Theme.warningRed : Theme.accentCyan)
                             Behavior on colorizationColor { ColorAnimation { duration: Theme.durationFast } }
                         }
                         MouseArea {
@@ -528,7 +528,7 @@ Item {
                             height: 10
                             radius: 5
                             color: Theme.warningRed
-                            visible: MusicViewModel.repeatMode === MusicViewModel.RepeatMode.One
+                            visible: MusicViewModel.repeatMode === MusicEnums.RepeatMode.One
                         }
                     }
 
