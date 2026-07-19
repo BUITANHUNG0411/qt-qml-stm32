@@ -155,47 +155,49 @@ Item {
             }
 
             // Loading spinner overlay (runs only while isLoading)
-            Item {
+            ColumnLayout {
                 anchors.centerIn: parent
-                width: 64
-                height: 64
+                spacing: 8
                 visible: MusicViewModel.isLoading
 
-                Rectangle {
-                    anchors.fill: parent
-                    radius: 32
-                    color: "transparent"
-                    border.color: Theme.accentCyan
-                    border.width: 3
-                    opacity: 0.25
-                }
+                Item {
+                    Layout.preferredWidth: 64
+                    Layout.preferredHeight: 64
 
-                Rectangle {
-                    anchors.fill: parent
-                    radius: 32
-                    color: "transparent"
-                    border.color: Theme.accentCyan
-                    border.width: 3
-                    visible: false
-                    id: spinnerArc
+                    Rectangle {
+                        anchors.fill: parent
+                        radius: 32
+                        color: "transparent"
+                        border.color: Theme.accentCyan
+                        border.width: 3
+                        opacity: 0.25
+                    }
 
-                    transform: Rotation {
-                        origin.x: 32
-                        origin.y: 32
-                        NumberAnimation on angle {
-                            from: 0
-                            to: 360
-                            duration: 900
-                            loops: Animation.Infinite
-                            running: MusicViewModel.isLoading
+                    Rectangle {
+                        anchors.fill: parent
+                        radius: 32
+                        color: "transparent"
+                        border.color: Theme.accentCyan
+                        border.width: 3
+                        visible: false
+                        id: spinnerArc
+
+                        transform: Rotation {
+                            origin.x: 32
+                            origin.y: 32
+                            NumberAnimation on angle {
+                                from: 0
+                                to: 360
+                                duration: 900
+                                loops: Animation.Infinite
+                                running: MusicViewModel.isLoading
+                            }
                         }
                     }
                 }
 
                 Text {
-                    anchors.top: parent.bottom
-                    anchors.topMargin: 8
-                    anchors.horizontalCenter: parent.horizontalCenter
+                    Layout.alignment: Qt.AlignHCenter
                     text: "Loading..."
                     color: Theme.accentCyan
                     font.family: Theme.fontMain
@@ -329,32 +331,34 @@ Item {
                 }
 
                 // 3. Volume Slider
-                Item {
+                Row {
                     width: parent.width
                     height: 16
                     anchors.horizontalCenter: parent.horizontalCenter
+                    spacing: 8
 
-                    Image {
-                        id: volIcon
-                        anchors.left: parent.left
-                        anchors.verticalCenter: parent.verticalCenter
+                    Item {
                         width: 16
                         height: 16
-                        source: "qrc:/qt/qml/com/showcase/resources/icons/volume.svg"
-                        sourceSize: Qt.size(16, 16)
-                        visible: false
-                    }
-                    MultiEffect {
-                        anchors.fill: volIcon
-                        source: volIcon
-                        colorization: 1.0
-                        colorizationColor: Theme.textSecondary
+                        anchors.verticalCenter: parent.verticalCenter
+
+                        Image {
+                            id: volIcon
+                            anchors.fill: parent
+                            source: "qrc:/qt/qml/com/showcase/resources/icons/volume.svg"
+                            sourceSize: Qt.size(16, 16)
+                            visible: false
+                        }
+                        MultiEffect {
+                            anchors.fill: volIcon
+                            source: volIcon
+                            colorization: 1.0
+                            colorizationColor: Theme.textSecondary
+                        }
                     }
 
                     Rectangle {
-                        anchors.left: volIcon.right
-                        anchors.leftMargin: 8
-                        anchors.right: parent.right
+                        width: parent.width - 16 - 8
                         anchors.verticalCenter: parent.verticalCenter
                         height: 3
                         color: "#40FFFFFF"

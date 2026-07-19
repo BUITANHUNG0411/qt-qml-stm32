@@ -74,6 +74,8 @@ Item {
         }
 
         // Center Panel (Media/Nav)
+        // centerPanel: intentional z:-1 inset between the two gauge bezels.
+        // DO NOT convert to horizontalCenter — it would break the depth layering.
         Item {
             id: centerPanel
             anchors.verticalCenter: parent.verticalCenter
