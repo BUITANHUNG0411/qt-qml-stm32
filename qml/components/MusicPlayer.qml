@@ -223,49 +223,53 @@ Item {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 50
 
-                    Column {
+                    Row {
                         anchors.centerIn: parent
-                        spacing: 2
-                        Text {
-                            text: pathView.currentItem ? pathView.currentItem.songTitle : (MusicViewModel.isScanning ? "Scanning..." : "No Music")
-                            font.family: Theme.fontMain
-                            font.pixelSize: 22
-                            font.bold: true
-                            color: Theme.textPrimary
-                            anchors.horizontalCenter: parent.horizontalCenter
-                        }
-                        Text {
-                            text: pathView.currentItem ? pathView.currentItem.songArtist : ""
-                            font.family: Theme.fontMain
-                            font.pixelSize: 14
-                            color: Theme.textSecondary
-                            anchors.horizontalCenter: parent.horizontalCenter
-                        }
-                    }
+                        spacing: 15
 
-                    // Scan Library Button
-                    Rectangle {
-                        anchors.right: parent.right
-                        anchors.verticalCenter: parent.verticalCenter
-                        width: 70
-                        height: 30
-                        radius: 8
-                        color: MusicViewModel.isScanning ? Theme.accentCyan : "transparent"
-                        border.color: Theme.accentCyan
-                        border.width: 1
-
-                        Text {
-                            anchors.centerIn: parent
-                            text: MusicViewModel.isScanning ? "..." : "Scan"
-                            color: MusicViewModel.isScanning ? Theme.backgroundDeepSpace : Theme.accentCyan
-                            font.family: Theme.fontMain
-                            font.pixelSize: 14
+                        Column {
+                            anchors.verticalCenter: parent.verticalCenter
+                            spacing: 2
+                            Text {
+                                text: pathView.currentItem ? pathView.currentItem.songTitle : (MusicViewModel.isScanning ? "Scanning..." : "No Music")
+                                font.family: Theme.fontMain
+                                font.pixelSize: 22
+                                font.bold: true
+                                color: Theme.textPrimary
+                                anchors.horizontalCenter: parent.horizontalCenter
+                            }
+                            Text {
+                                text: pathView.currentItem ? pathView.currentItem.songArtist : ""
+                                font.family: Theme.fontMain
+                                font.pixelSize: 14
+                                color: Theme.textSecondary
+                                anchors.horizontalCenter: parent.horizontalCenter
+                            }
                         }
 
-                        MouseArea {
-                            anchors.fill: parent
-                            onClicked: MusicViewModel.scanLibrary()
-                            enabled: !MusicViewModel.isScanning
+                        // Scan Library Button
+                        Rectangle {
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: 70
+                            height: 30
+                            radius: 8
+                            color: MusicViewModel.isScanning ? Theme.accentCyan : "transparent"
+                            border.color: Theme.accentCyan
+                            border.width: 1
+
+                            Text {
+                                anchors.centerIn: parent
+                                text: MusicViewModel.isScanning ? "..." : "Scan"
+                                color: MusicViewModel.isScanning ? Theme.backgroundDeepSpace : Theme.accentCyan
+                                font.family: Theme.fontMain
+                                font.pixelSize: 14
+                            }
+
+                            MouseArea {
+                                anchors.fill: parent
+                                onClicked: MusicViewModel.scanLibrary()
+                                enabled: !MusicViewModel.isScanning
+                            }
                         }
                     }
                 }
@@ -275,59 +279,68 @@ Item {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 10
 
-                    Rectangle {
+                    // Centered inner container — anchor-based centering, no manual margin
+                    Item {
+                        id: scrubberInner
+                        anchors.horizontalCenter: parent.horizontalCenter
                         anchors.verticalCenter: parent.verticalCenter
-                        width: parent.width
-                        height: 3
-                        color: "#40FFFFFF"
-                        radius: 1.5
+                        width: parent.width * 0.6
+                        height: parent.height
 
                         Rectangle {
-                            width: parent.width * (root.scrubberDragging
-                                ? (scrberMouse.dragX / Math.max(1, root.width))
-                                : (MusicViewModel.duration > 0
-                                    ? (MusicViewModel.positionMs / MusicViewModel.duration)
-                                    : MusicViewModel.progress))
-                            height: parent.height
-                            color: Theme.accentCyan
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: parent.width
+                            height: 3
+                            color: "#40FFFFFF"
                             radius: 1.5
 
-                            // Glowing Thumb
                             Rectangle {
-                                id: thumb
-                                width: 10
-                                height: 10
-                                radius: 5
-                                color: Theme.textPrimary
-                                anchors.verticalCenter: parent.verticalCenter
-                                anchors.right: parent.right
-                                anchors.rightMargin: -5
-                            }
+                                width: parent.width * (root.scrubberDragging
+                                    ? (scrberMouse.dragX / Math.max(1, scrubberInner.width))
+                                    : (MusicViewModel.duration > 0
+                                        ? (MusicViewModel.positionMs / MusicViewModel.duration)
+                                        : MusicViewModel.progress))
+                                height: parent.height
+                                color: Theme.accentCyan
+                                radius: 1.5
 
-                            MultiEffect {
-                                anchors.fill: thumb
-                                source: thumb
-                                shadowEnabled: true
-                                shadowColor: Theme.accentCyan
-                                shadowBlur: 1.0
+                                // Glowing Thumb
+                                Rectangle {
+                                    id: thumb
+                                    width: 10
+                                    height: 10
+                                    radius: 5
+                                    color: Theme.textPrimary
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    anchors.right: parent.right
+                                    anchors.rightMargin: -5
+                                }
+
+                                MultiEffect {
+                                    anchors.fill: thumb
+                                    source: thumb
+                                    shadowEnabled: true
+                                    shadowColor: Theme.accentCyan
+                                    shadowBlur: 1.0
+                                }
                             }
                         }
-                    }
 
-                    MouseArea {
-                        id: scrberMouse
-                        anchors.fill: parent
-                        property real dragX: 0
-                        onPressed: {
-                            root.scrubberDragging = true
-                            dragX = mouseX
-                            MusicViewModel.seek(mouseX / Math.max(1, width))
+                        MouseArea {
+                            id: scrberMouse
+                            anchors.fill: parent
+                            property real dragX: 0
+                            onPressed: {
+                                root.scrubberDragging = true
+                                dragX = mouseX
+                                MusicViewModel.seek(mouseX / Math.max(1, scrubberInner.width))
+                            }
+                            onPositionChanged: {
+                                dragX = mouseX
+                                MusicViewModel.seek(mouseX / Math.max(1, scrubberInner.width))
+                            }
+                            onReleased: root.scrubberDragging = false
                         }
-                        onPositionChanged: {
-                            dragX = mouseX
-                            MusicViewModel.seek(mouseX / Math.max(1, width))
-                        }
-                        onReleased: root.scrubberDragging = false
                     }
                 }
 
@@ -336,43 +349,52 @@ Item {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 14
 
-                    Image {
-                        id: volIcon
-                        anchors.left: parent.left
+                    // Centered inner container — same anchoring pattern
+                    Item {
+                        id: volumeInner
+                        anchors.horizontalCenter: parent.horizontalCenter
                         anchors.verticalCenter: parent.verticalCenter
-                        width: 16
-                        height: 16
-                        source: "qrc:/qt/qml/com/showcase/resources/icons/volume.svg"
-                        sourceSize: Qt.size(16, 16)
-                        visible: false
-                    }
-                    MultiEffect {
-                        anchors.fill: volIcon
-                        source: volIcon
-                        colorization: 1.0
-                        colorizationColor: Theme.textSecondary
-                    }
+                        width: parent.width * 0.6
+                        height: parent.height
 
-                    Rectangle {
-                        anchors.left: volIcon.right
-                        anchors.leftMargin: 8
-                        anchors.right: parent.right
-                        anchors.verticalCenter: parent.verticalCenter
-                        height: 3
-                        color: "#40FFFFFF"
-                        radius: 1.5
-
-                        Rectangle {
-                            width: parent.width * MusicViewModel.volume
-                            height: parent.height
-                            color: Theme.accentCyan
-                            radius: 1.5
+                        Image {
+                            id: volIcon
+                            anchors.left: parent.left
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: 16
+                            height: 16
+                            source: "qrc:/qt/qml/com/showcase/resources/icons/volume.svg"
+                            sourceSize: Qt.size(16, 16)
+                            visible: false
+                        }
+                        MultiEffect {
+                            anchors.fill: volIcon
+                            source: volIcon
+                            colorization: 1.0
+                            colorizationColor: Theme.textSecondary
                         }
 
-                        MouseArea {
-                            anchors.fill: parent
-                            onPressed: MusicViewModel.setVolume(mouseX / Math.max(1, width))
-                            onPositionChanged: MusicViewModel.setVolume(mouseX / Math.max(1, width))
+                        Rectangle {
+                            anchors.left: volIcon.right
+                            anchors.leftMargin: 8
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: parent.width - volIcon.width - 8
+                            height: 3
+                            color: "#40FFFFFF"
+                            radius: 1.5
+
+                            Rectangle {
+                                width: parent.width * MusicViewModel.volume
+                                height: parent.height
+                                color: Theme.accentCyan
+                                radius: 1.5
+                            }
+
+                            MouseArea {
+                                anchors.fill: parent
+                                onPressed: MusicViewModel.setVolume(mouseX / Math.max(1, width))
+                                onPositionChanged: MusicViewModel.setVolume(mouseX / Math.max(1, width))
+                            }
                         }
                     }
                 }
