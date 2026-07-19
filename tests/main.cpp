@@ -17,6 +17,7 @@ private slots:
         QCOMPARE(vm.rpm(), 0);
         QCOMPARE(vm.gear(), QString("P"));
         QCOMPARE(vm.isWarning(), false);
+        QCOMPARE(vm.displaySpeed(), 0);
     }
 
     void testSetSpeed() {
@@ -25,6 +26,7 @@ private slots:
         
         vm.setSpeed(120.5);
         QCOMPARE(vm.speed(), 120.5);
+        QCOMPARE(vm.displaySpeed(), 121);
         QCOMPARE(spy.count(), 1);
         
         // Setting same value should not emit signal again
@@ -59,24 +61,22 @@ private slots:
         QCOMPARE(spy.count(), 1);
     }
     
-    void testUpdateRawTelemetry() {
+    void testUpdateTelemetry() {
         VehicleStatusViewModel vm;
         
-        // RPM = 3000 -> speed = 3000 * 0.03 = 90
-        // Speed > 80 -> Gear 5
-        // Error = 0, VBat = 12.0 -> Warning = false
-        vm.updateRawTelemetry(3000, 12.0, 0);
+        vm.updateTelemetry(90.0, 3000, "5", false, 95, 300, 60);
         
-        QCOMPARE(vm.rpm(), 3000);
         QCOMPARE(vm.speed(), 90.0);
+        QCOMPARE(vm.displaySpeed(), 90);
+        QCOMPARE(vm.rpm(), 3000);
         QCOMPARE(vm.gear(), QString("5"));
         QCOMPARE(vm.isWarning(), false);
+        QCOMPARE(vm.battery(), 95);
+        QCOMPARE(vm.range(), 300);
+        QCOMPARE(vm.temperature(), 60);
         
-        // Test warning logic
-        vm.updateRawTelemetry(3000, 10.0, 0); // VBat < 10.5
-        QCOMPARE(vm.isWarning(), true);
-        
-        vm.updateRawTelemetry(3000, 12.0, 1); // Error != 0
+        vm.updateTelemetry(90.6, 3000, "5", true);
+        QCOMPARE(vm.displaySpeed(), 91);
         QCOMPARE(vm.isWarning(), true);
     }
 };

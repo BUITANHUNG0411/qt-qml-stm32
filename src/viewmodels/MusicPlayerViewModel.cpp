@@ -21,6 +21,7 @@ MusicPlayerViewModel::MusicPlayerViewModel(QObject *parent)
     connect(this, &MusicPlayerViewModel::requestScan, m_scanner, &MusicScanner::scanLibrary);
     connect(m_scanner, &MusicScanner::songFound, this, &MusicPlayerViewModel::onSongFound);
     connect(m_scanner, &MusicScanner::scanFinished, this, &MusicPlayerViewModel::onScanFinished);
+    connect(&m_scannerThread, &QThread::finished, m_scanner, &QObject::deleteLater);
 
     m_scannerThread.start();
 }
@@ -28,7 +29,6 @@ MusicPlayerViewModel::MusicPlayerViewModel(QObject *parent)
 MusicPlayerViewModel::~MusicPlayerViewModel()
 {
     m_scannerThread.requestInterruption();
-    m_scanner->deleteLater();
     m_scannerThread.quit();
     m_scannerThread.wait();
 }
@@ -150,7 +150,6 @@ void MusicPlayerViewModel::scanLibrary()
     beginResetModel();
     m_songs.clear();
     m_currentIndex = -1;
-    m_player->stop();
     endResetModel();
     emit currentIndexChanged();
 
@@ -166,16 +165,6 @@ void MusicPlayerViewModel::onSongFound(const SongData& song)
     beginInsertRows(QModelIndex(), m_songs.count(), m_songs.count());
     m_songs.append(song);
     endInsertRows();
-
-    // Select the first song automatically and start playing
-    if (m_songs.count() == 1) {
-        m_currentIndex = 0;
-        emit currentIndexChanged();
-        m_progress = 0.0f;
-        emit progressChanged();
-        m_player->setSource(QUrl::fromLocalFile(m_songs[0].filePath));
-        m_player->play();
-    }
 }
 
 void MusicPlayerViewModel::onScanFinished()

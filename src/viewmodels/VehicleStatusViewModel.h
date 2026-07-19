@@ -9,6 +9,7 @@ class VehicleStatusViewModel : public QObject
     Q_OBJECT
 
     Q_PROPERTY(double speed READ speed WRITE setSpeed NOTIFY speedChanged)
+    Q_PROPERTY(int displaySpeed READ displaySpeed NOTIFY speedChanged)
     Q_PROPERTY(int rpm READ rpm WRITE setRpm NOTIFY rpmChanged)
     Q_PROPERTY(QString gear READ gear WRITE setGear NOTIFY gearChanged)
     Q_PROPERTY(bool isWarning READ isWarning WRITE setIsWarning NOTIFY isWarningChanged)
@@ -20,6 +21,7 @@ public:
     explicit VehicleStatusViewModel(QObject *parent = nullptr);
 
     double speed() const;
+    int displaySpeed() const;
     void setSpeed(double newSpeed);
 
     int rpm() const;
@@ -42,7 +44,6 @@ public:
 
 public slots:
     void updateTelemetry(double speed, int rpm, const QString &gear, bool isWarning, int battery = 100, int range = 325, int temperature = 57);
-    void updateRawTelemetry(int rpm, double vbat, int error);
 
 signals:
     void speedChanged();

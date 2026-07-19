@@ -26,6 +26,15 @@ Item {
                 preferredHighlightBegin: 0.5
                 preferredHighlightEnd: 0.5
                 interactive: true
+                
+                Connections {
+                    target: MusicViewModel
+                    function onCurrentIndexChanged() {
+                        pathView.currentIndex = MusicViewModel.currentIndex
+                    }
+                }
+                
+                onMovementEnded: MusicViewModel.setCurrentIndex(currentIndex)
 
                 // 3D Depth Path
                 path: Path {
@@ -94,10 +103,7 @@ Item {
                     
                     MouseArea {
                         anchors.fill: parent
-                        onClicked: {
-                            pathView.currentIndex = index
-                            MusicViewModel.setCurrentIndex(index)
-                        }
+                        onClicked: MusicViewModel.play(index)
                     }
                 }
             }

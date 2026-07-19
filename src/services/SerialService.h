@@ -20,7 +20,7 @@ public:
     void emergencyStop();
 
 signals:
-    void rawTelemetryUpdated(int rpm, double vbat, int error);
+    void telemetryUpdated(double speed, int rpm, const QString &gear, bool isWarning, int battery, int range, int temperature);
     void connectionStatusChanged(bool isConnected);
 
 private slots:

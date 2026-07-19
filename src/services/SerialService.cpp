@@ -76,6 +76,12 @@ void SerialService::handleReadyRead()
 {
     m_buffer.append(m_serial->readAll());
 
+    if (m_buffer.size() > 4096) {
+        qWarning() << "Serial buffer exceeded max limit, clearing.";
+        m_buffer.clear();
+        return;
+    }
+
     // Process line-by-line
     while (m_buffer.contains('\n')) {
         int newlineIndex = m_buffer.indexOf('\n');
@@ -106,15 +112,26 @@ void SerialService::parseTelemetry(const QString &line)
 
             if (okRpm && okVbat && okError) {
                 // Verify checksum
-                int expectedChecksum = (rpm + static_cast<int>(vbat) + error) % 256;
-                if (checksumStr.isEmpty() || checksumStr.toInt() == expectedChecksum) {
+                int expectedChecksum = (rpm + static_cast<int>(vbat) + error) & 0xFF;
+                if (checksumStr.toInt() == expectedChecksum) {
                     m_watchdogTimer->start();
                     if (!m_isConnected) {
                         m_isConnected = true;
                         emit connectionStatusChanged(true);
                     }
                     m_lastRpm = rpm;
-                    emit rawTelemetryUpdated(rpm, vbat, error);
+                    
+                    double calcSpeed = static_cast<double>(rpm) * 0.03;
+                    QString calcGear = "N";
+                    if (calcSpeed > 0 && calcSpeed <= 20) calcGear = "1";
+                    else if (calcSpeed > 20 && calcSpeed <= 40) calcGear = "2";
+                    else if (calcSpeed > 40 && calcSpeed <= 60) calcGear = "3";
+                    else if (calcSpeed > 60 && calcSpeed <= 80) calcGear = "4";
+                    else if (calcSpeed > 80) calcGear = "5";
+
+                    bool warning = (error != 0) || (vbat < 10.5);
+                    
+                    emit telemetryUpdated(calcSpeed, rpm, calcGear, warning, 100, 325, 57);
                 }
             }
         }
@@ -140,7 +157,7 @@ void SerialService::handleWatchdogTimeout()
     }
     m_lastSpeed = 0.0;
     m_lastRpm = 0;
-    emit rawTelemetryUpdated(0, 0.0, 1); // 1 = error/stale data
+    emit telemetryUpdated(0.0, 0, "N", true, 0, 0, 0); // 1 = error/stale data
     
     // Auto-reconnect
     if (!m_reconnectTimer->isActive()) {

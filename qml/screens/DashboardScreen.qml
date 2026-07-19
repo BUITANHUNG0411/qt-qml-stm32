@@ -56,7 +56,7 @@ Item {
                 
                 GlowingText {
                     anchors.horizontalCenter: parent.horizontalCenter
-                    text: Math.round(vm.speed).toString()
+                    text: vm.displaySpeed
                     font.pixelSize: 90
                     glowColor: vm.isWarning ? Theme.warningRed : Theme.accentCyan
                     color: Theme.textPrimary

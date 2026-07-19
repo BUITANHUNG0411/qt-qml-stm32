@@ -67,21 +67,22 @@ Item {
                 // Góc quay từ 135 đến 135+270 độ
                 rotation: 135 + (index / root.tickCount) * 270
 
+                property real tickValue: (index / root.tickCount) * root.maxValue
+                property int displayTickValue: tickValue + 0.5
+                property bool isIlluminated: tickValue <= root.displayedValue
+                property bool isMajor: index % root.majorTickInterval === 0
+                property bool isRedline: root.redlineValue > 0 && tickValue >= root.redlineValue
+
                 Rectangle {
-                    property real tickValue: (index / root.tickCount) * root.maxValue
-                    property bool isIlluminated: tickValue <= root.displayedValue
-                    property bool isMajor: index % root.majorTickInterval === 0
-                    property bool isRedline: root.redlineValue > 0 && tickValue >= root.redlineValue
+                    property color activeColor: parent.isRedline ? root.warningColor : (root.isWarning ? root.warningColor : root.gaugeColor)
                     
-                    property color activeColor: isRedline ? root.warningColor : (root.isWarning ? root.warningColor : root.gaugeColor)
-                    
-                    width: isMajor ? root.width * 0.04 : root.width * 0.02
-                    height: isMajor ? 4 : 2
+                    width: parent.isMajor ? root.width * 0.04 : root.width * 0.02
+                    height: parent.isMajor ? 4 : 2
                     
                     // Sửa lỗi: Vạch chưa sáng phải thật tối để không phát Glow
-                    color: isIlluminated ? (isRedline ? "#FFB3CC" : "#FFFFFF") : 
-                           (isMajor ? "#2A3B4C" : "#151D26")
-                    opacity: isIlluminated ? 1.0 : (isMajor ? 0.8 : 0.4)
+                    color: parent.isIlluminated ? (parent.isRedline ? "#FFB3CC" : "#FFFFFF") : 
+                           (parent.isMajor ? "#2A3B4C" : "#151D26")
+                    opacity: parent.isIlluminated ? 1.0 : (parent.isMajor ? 0.8 : 0.4)
                     
                     x: root.width / 2 + (root.width / 2 - 30) - width
                     y: root.height / 2 - height / 2
@@ -92,17 +93,12 @@ Item {
 
                 // Chữ số nhãn
                 Text {
-                    property real tickValue: (index / root.tickCount) * root.maxValue
-                    property bool isIlluminated: tickValue <= root.displayedValue
-                    property bool isMajor: index % root.majorTickInterval === 0
-                    property bool isRedline: root.redlineValue > 0 && tickValue >= root.redlineValue
-                    
-                    visible: isMajor
-                    text: Math.round(tickValue).toString()
-                    color: isIlluminated ? Theme.textPrimary : Theme.textSecondary
+                    visible: parent.isMajor
+                    text: parent.displayTickValue
+                    color: parent.isIlluminated ? Theme.textPrimary : Theme.textSecondary
                     font.family: Theme.fontMain
                     font.pixelSize: root.width * 0.045
-                    opacity: isIlluminated ? 1.0 : 0.4
+                    opacity: parent.isIlluminated ? 1.0 : 0.4
                     
                     x: root.width / 2 + (root.width / 2 - 65) - width / 2
                     y: root.height / 2 - height / 2

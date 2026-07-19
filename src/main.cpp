@@ -30,9 +30,9 @@ int main(int argc, char *argv[]) {
   });
 
   // Route telemetry from SerialService
-  QObject::connect(&serialService, &SerialService::rawTelemetryUpdated, [&](int rpm, double vbat, int error) {
+  QObject::connect(&serialService, &SerialService::telemetryUpdated, [&](double speed, int rpm, const QString &gear, bool isWarning, int battery, int range, int temperature) {
       if (isHardwareConnected) {
-          vm.updateRawTelemetry(rpm, vbat, error);
+          vm.updateTelemetry(speed, rpm, gear, isWarning, battery, range, temperature);
       }
   });
 
