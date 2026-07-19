@@ -97,18 +97,49 @@ Item {
                     property string songArtist: model.artist
                     property string coverColor1: model.color1
                     property string coverColor2: model.color2
+                    property string songCoverArt: model.coverArt !== undefined ? model.coverArt : ""
 
                     // Base container for the cover (rotates when playing)
                     Rectangle {
                         id: coverRect
                         anchors.fill: parent
                         radius: 16
-                        gradient: Gradient {
-                            GradientStop { position: 0.0; color: model.color1 !== undefined ? model.color1 : "#FF0055" }
-                            GradientStop { position: 1.0; color: model.color2 !== undefined ? model.color2 : "#4A00E0" }
-                        }
+                        color: "transparent"
                         border.color: PathView.isCurrentItem ? Theme.accentCyan : "transparent"
                         border.width: PathView.isCurrentItem ? 2 : 0
+
+                        Rectangle {
+                            anchors.fill: parent
+                            radius: 16
+                            visible: songCoverArt === ""
+                            gradient: Gradient {
+                                GradientStop { position: 0.0; color: model.color1 !== undefined ? model.color1 : "#FF0055" }
+                                GradientStop { position: 1.0; color: model.color2 !== undefined ? model.color2 : "#4A00E0" }
+                            }
+                        }
+
+                        Rectangle {
+                            id: maskRect
+                            anchors.fill: parent
+                            radius: 16
+                            visible: false
+                        }
+
+                        Image {
+                            id: coverImg
+                            anchors.fill: parent
+                            source: songCoverArt
+                            fillMode: Image.PreserveAspectCrop
+                            visible: false
+                        }
+
+                        MultiEffect {
+                            anchors.fill: parent
+                            source: coverImg
+                            maskEnabled: true
+                            maskSource: maskRect
+                            visible: songCoverArt !== ""
+                        }
 
                         transform: Rotation {
                             id: coverRotation
@@ -231,10 +262,13 @@ Item {
                         Text {
                             text: pathView.currentItem ? pathView.currentItem.songTitle : (MusicViewModel.isScanning ? "Scanning..." : "No Music")
                             font.family: Theme.fontMain
-                            font.pixelSize: 22
+                            font.pixelSize: 20
                             font.bold: true
                             color: Theme.textPrimary
                             anchors.horizontalCenter: parent.horizontalCenter
+                            width: parent.width * 0.95
+                            horizontalAlignment: Text.AlignHCenter
+                            elide: Text.ElideRight
                         }
                         Text {
                             text: pathView.currentItem ? pathView.currentItem.songArtist : ""

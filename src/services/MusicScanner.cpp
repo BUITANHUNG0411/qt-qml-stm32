@@ -3,6 +3,7 @@
 #include <QFileInfo>
 #include <QThread>
 #include <QHash>
+#include <QRegularExpression>
 
 MusicScanner::MusicScanner(QObject* parent) : QObject(parent) {}
 
@@ -25,6 +26,18 @@ void MusicScanner::scanLibrary(const QString& path) {
         } else {
             song.artist = "Unknown Artist";
             song.title = baseName;
+        }
+
+        // Clean up long titles: remove anything after ( or [
+        int bracketIdx = song.title.indexOf(QRegularExpression("[\\(\\[]"));
+        if (bracketIdx > 0) {
+            song.title = song.title.left(bracketIdx).trimmed();
+        }
+
+        // Check for extracted cover art jpg
+        QFileInfo coverFi(fi.absolutePath() + "/" + baseName + ".jpg");
+        if (coverFi.exists()) {
+            song.coverArt = "file://" + coverFi.absoluteFilePath();
         }
 
         // Generate consistent mock colors based on filename hash to maintain Neon aesthetic

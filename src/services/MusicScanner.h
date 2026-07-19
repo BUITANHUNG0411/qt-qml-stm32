@@ -9,6 +9,7 @@ struct SongData {
     QString filePath;
     QString color1;
     QString color2;
+    QString coverArt;
 };
 
 class MusicScanner : public QObject

@@ -43,7 +43,8 @@ public:
         ArtistRole,
         FilePathRole,
         Color1Role,
-        Color2Role
+        Color2Role,
+        CoverArtRole
     };
 
     explicit MusicPlayerViewModel(QObject *parent = nullptr);

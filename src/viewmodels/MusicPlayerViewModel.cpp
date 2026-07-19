@@ -78,6 +78,7 @@ QVariant MusicPlayerViewModel::data(const QModelIndex &index, int role) const
         case FilePathRole: return song.filePath;
         case Color1Role: return song.color1;
         case Color2Role: return song.color2;
+        case CoverArtRole: return song.coverArt;
     }
     return QVariant();
 }
@@ -90,6 +91,7 @@ QHash<int, QByteArray> MusicPlayerViewModel::roleNames() const
     roles[FilePathRole] = "filePath";
     roles[Color1Role] = "color1";
     roles[Color2Role] = "color2";
+    roles[CoverArtRole] = "coverArt";
     return roles;
 }
 
