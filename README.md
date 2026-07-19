@@ -61,8 +61,8 @@
 
 Watch the simulator in action (including Neon UI, dynamic gauges, and music player):
 
-<video src="resources/media/simulator-demo.webm" controls="controls" muted="muted" width="100%">
-  <a href="resources/media/simulator-demo.webm">View Simulator Demo Video</a>
+<video src="https://github.com/BUITANHUNG0411/qt-qml-stm32/raw/main/resources/media/simulator-demo.webm" controls="controls" muted="muted" width="100%">
+  <a href="https://github.com/BUITANHUNG0411/qt-qml-stm32/raw/main/resources/media/simulator-demo.webm">View Simulator Demo Video</a>
 </video>
 
 <!-- TODO: screenshot — Main dashboard in Bike form factor -->
