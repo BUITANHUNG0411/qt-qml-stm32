@@ -26,6 +26,11 @@ compile_commands.json
 *.mp4
 *.avi
 *.mkv
+*.mp3
+*.flac
+*.webm
+ffmpeg*
+ffprobe*
 
 # OS generated
 .DS_Store
