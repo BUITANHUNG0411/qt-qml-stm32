@@ -7,15 +7,17 @@ Item {
     id: root
     anchors.fill: parent
 
-    property var vm: VehicleStatus
+    property QtObject vm: VehicleStatus
+    property real leftGaugeX: Theme.gaugeInsetLeft - Theme.dashboardMargin
+    property real rightGaugeX: Theme.gaugeInsetRight - Theme.dashboardMargin
 
     // Top Bar (Telltales)
-    Row {
+    RowLayout {
         id: topBar
         anchors.top: parent.top
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.topMargin: 70
-        spacing: 40
+        spacing: Theme.spaceXXl
 
         // Mock Icons (Cyberpunk style)
         Rectangle { width: 30; height: 10; radius: 5; color: Theme.accentCyan; opacity: 0.5 }
@@ -34,10 +36,9 @@ Item {
             width: 350
             height: 400
             anchors.verticalCenter: parent.verticalCenter
-            anchors.verticalCenterOffset: -30
-            // Exact center of the left arch is X=270 in clusterFrame. 
-            // DashboardScreen has 10 margin inside clusterFrame, so X=260 relative to parent.
-            x: 260 - width / 2
+            anchors.verticalCenterOffset: Theme.panelLift
+            anchors.left: parent.left
+            anchors.leftMargin: root.leftGaugeX - width / 2
 
             NeonTickGauge {
                 anchors.centerIn: parent
@@ -79,7 +80,7 @@ Item {
         Item {
             id: centerPanel
             anchors.verticalCenter: parent.verticalCenter
-            anchors.verticalCenterOffset: -30
+            anchors.verticalCenterOffset: Theme.panelLift
             height: 450
             anchors.left: leftPanel.right
             anchors.right: rightPanel.left
@@ -99,10 +100,9 @@ Item {
             width: 350
             height: 400
             anchors.verticalCenter: parent.verticalCenter
-            anchors.verticalCenterOffset: -30
-            // Exact center of the right arch is X=890 in clusterFrame.
-            // DashboardScreen has 10 margin inside clusterFrame, so X=880 relative to parent.
-            x: 880 - width / 2
+            anchors.verticalCenterOffset: Theme.panelLift
+            anchors.left: parent.left
+            anchors.leftMargin: root.rightGaugeX - width / 2
 
             NeonTickGauge {
                 anchors.centerIn: parent
@@ -150,24 +150,18 @@ Item {
         // Left: Range
         Column {
             Layout.alignment: Qt.AlignLeft
-            spacing: 8
+            spacing: Theme.spaceMd
             Text { 
                 text: vm.range + " km"
                 color: Theme.textPrimary
                 font.family: Theme.fontMain
-                font.pixelSize: 20 
+                font.pixelSize: Theme.textLg
             }
-            // Mock energy blocks
-            Row {
-                spacing: 4
-                Repeater {
-                    model: 20
-                    Rectangle {
-                        width: 8; height: 8; radius: 2
-                        color: index < 15 ? Theme.accentCyan : Theme.textSecondary
-                        opacity: index < 15 ? 1.0 : 0.3
-                    }
-                }
+            EnergyBlocks {
+                value: vm.range
+                maxValue: 400
+                warningThreshold: 50
+                invertWarning: false
             }
         }
 
@@ -199,27 +193,20 @@ Item {
         // Right: Battery
         Column {
             Layout.alignment: Qt.AlignRight
-            spacing: 8
+            spacing: Theme.spaceMd
             Text { 
                 text: vm.battery + " %"
                 color: Theme.textPrimary
                 font.family: Theme.fontMain
-                font.pixelSize: 20
+                font.pixelSize: Theme.textLg
                 anchors.right: parent.right 
             }
-            Row {
+            EnergyBlocks {
                 anchors.right: parent.right 
-                spacing: 4
-                Repeater {
-                    model: 20
-                    Rectangle {
-                        width: 8; height: 8; radius: 2
-                        // Map battery (0-100) to 20 blocks
-                        property bool isActive: index < (vm.battery / 5)
-                        color: isActive ? (vm.battery < 20 ? Theme.warningRed : Theme.accentCyan) : Theme.textSecondary
-                        opacity: isActive ? 1.0 : 0.3
-                    }
-                }
+                value: vm.battery
+                maxValue: 100
+                warningThreshold: 20
+                invertWarning: false
             }
         }
     }

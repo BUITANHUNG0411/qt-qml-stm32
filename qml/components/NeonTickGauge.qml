@@ -24,7 +24,7 @@ Item {
     // Giá trị hiển thị chạy mượt mà (trailing effect)
     property real displayedValue: value
     Behavior on displayedValue {
-        NumberAnimation { duration: 250; easing.type: Easing.OutQuad }
+        NumberAnimation { duration: Theme.durationGauge; easing.type: Easing.OutQuad }
     }
 
     // Lớp 1: Ánh sáng nền (Ambient Backlight)
@@ -73,22 +73,24 @@ Item {
                 property bool isMajor: index % root.majorTickInterval === 0
                 property bool isRedline: root.redlineValue > 0 && tickValue >= root.redlineValue
 
+                property real tickInset: Theme.spaceXXl + Theme.spaceLg
+
                 Rectangle {
                     property color activeColor: parent.isRedline ? root.warningColor : (root.isWarning ? root.warningColor : root.gaugeColor)
                     
                     width: parent.isMajor ? root.width * 0.04 : root.width * 0.02
                     height: parent.isMajor ? 4 : 2
                     
-                    // Sửa lỗi: Vạch chưa sáng phải thật tối để không phát Glow
-                    color: parent.isIlluminated ? (parent.isRedline ? "#FFB3CC" : "#FFFFFF") : 
-                           (parent.isMajor ? "#2A3B4C" : "#151D26")
+                    color: parent.isIlluminated ? (parent.isRedline ? Theme.tickLitMajor : Theme.tickLitMinor) : 
+                           (parent.isMajor ? Theme.tickDimMajor : Theme.tickDimMinor)
                     opacity: parent.isIlluminated ? 1.0 : (parent.isMajor ? 0.8 : 0.4)
                     
-                    x: root.width / 2 + (root.width / 2 - 30) - width
-                    y: root.height / 2 - height / 2
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.left: parent.left
+                    anchors.leftMargin: root.width / 2 + tickInset - width
                     
-                    Behavior on opacity { NumberAnimation { duration: 150 } }
-                    Behavior on color { ColorAnimation { duration: 150 } }
+                    Behavior on opacity { NumberAnimation { duration: Theme.durationTick } }
+                    Behavior on color { ColorAnimation { duration: Theme.durationTick } }
                 }
 
                 // Chữ số nhãn
@@ -100,15 +102,16 @@ Item {
                     font.pixelSize: root.width * 0.045
                     opacity: parent.isIlluminated ? 1.0 : 0.4
                     
-                    x: root.width / 2 + (root.width / 2 - 65) - width / 2
-                    y: root.height / 2 - height / 2
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.left: parent.left
+                    anchors.leftMargin: root.width / 2 + tickInset + Theme.spaceXXl - width / 2
 
                     // Giữ chữ luôn thẳng đứng
                     rotation: -(135 + (index / root.tickCount) * 270)
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
                     
-                    Behavior on opacity { NumberAnimation { duration: 150 } }
+                    Behavior on opacity { NumberAnimation { duration: Theme.durationTick } }
                 }
             }
         }

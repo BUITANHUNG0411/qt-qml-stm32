@@ -1,6 +1,5 @@
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.Shapes
 import QtQuick.Effects
 import com.showcase
 
@@ -9,12 +8,10 @@ Item {
     implicitWidth: 350
     implicitHeight: 450
 
-    // Local UI state (declarative only — no JS logic)
-    property bool scrubberDragging: false
-    property string toastMessage: ""
-    property real toastOpacity: 0.0
+    // Local UI state
+    property bool scrubberDragging: scrberMouse.pressed
 
-    // Neon Blur Backdrop driven by current song color1 (Zero-JS)
+    // Neon Blur Backdrop driven by current song
     Rectangle {
         id: blurBackdrop
         anchors.fill: parent
@@ -34,7 +31,7 @@ Item {
                 anchors.fill: parent
                 visible: parent.children[0].source.toString() === ""
                 gradient: Gradient {
-                    GradientStop { position: 0.0; color: pathView.currentItem !== null ? (pathView.currentItem.coverColor1 !== undefined ? pathView.currentItem.coverColor1 : "#FF0055") : "#FF0055" }
+                    GradientStop { position: 0.0; color: pathView.currentItem !== null ? (pathView.currentItem.coverColor1 !== undefined ? pathView.currentItem.coverColor1 : Theme.coverFallback1) : Theme.coverFallback1 }
                     GradientStop { position: 1.0; color: Theme.backgroundDeepSpace }
                 }
             }
@@ -51,7 +48,7 @@ Item {
 
     ColumnLayout {
         anchors.fill: parent
-        spacing: 20
+        spacing: Theme.spaceXl
 
         // Top 70%: Cover Flow Area
         Item {
@@ -66,17 +63,14 @@ Item {
                 preferredHighlightBegin: 0.5
                 preferredHighlightEnd: 0.5
                 interactive: true
-
-                Connections {
-                    target: MusicViewModel
-                    function onCurrentIndexChanged() {
-                        pathView.currentIndex = MusicViewModel.currentIndex
+                
+                currentIndex: MusicViewModel.currentIndex
+                onCurrentIndexChanged: {
+                    if (interactive && currentIndex !== MusicViewModel.currentIndex) {
+                        MusicViewModel.setCurrentIndex(currentIndex)
                     }
                 }
 
-                onMovementEnded: MusicViewModel.setCurrentIndex(currentIndex)
-
-                // 3D Depth Path
                 path: Path {
                     startX: 0
                     startY: pathView.height / 2
@@ -103,21 +97,19 @@ Item {
                     opacity: PathView.itemOpacity
                     z: PathView.itemZ
 
-                    // Expose properties to avoid binding errors
                     property string songTitle: model.title
                     property string songArtist: model.artist
                     property string coverColor1: model.color1
                     property string coverColor2: model.color2
                     property string coverArt: model.coverArt !== undefined ? model.coverArt : ""
 
-                    // Base container for the cover (rotates when playing)
                     Rectangle {
                         id: coverRect
                         anchors.fill: parent
-                        radius: 16
+                        radius: Theme.radiusMd
                         gradient: Gradient {
-                            GradientStop { position: 0.0; color: model.color1 !== undefined ? model.color1 : "#FF0055" }
-                            GradientStop { position: 1.0; color: model.color2 !== undefined ? model.color2 : "#4A00E0" }
+                            GradientStop { position: 0.0; color: model.color1 !== undefined ? model.color1 : Theme.coverFallback1 }
+                            GradientStop { position: 1.0; color: model.color2 !== undefined ? model.color2 : Theme.coverFallback2 }
                         }
                         border.color: PathView.isCurrentItem ? Theme.accentCyan : "transparent"
                         border.width: PathView.isCurrentItem ? 2 : 0
@@ -135,20 +127,15 @@ Item {
                             origin.x: coverRect.width / 2
                             origin.y: coverRect.height / 2
                             axis { x: 0; y: 1; z: 0 }
-
                             NumberAnimation on angle {
-                                from: 0
-                                to: 360
-                                duration: 8000
-                                loops: Animation.Infinite
+                                from: 0; to: 360; duration: Theme.durationCover; loops: Animation.Infinite
                                 running: PathView.isCurrentItem && MusicViewModel.isPlaying
                             }
                         }
 
-                        // Reflection mask effect fading into background
                         Rectangle {
                             anchors.fill: parent
-                            radius: 16
+                            radius: Theme.radiusMd
                             gradient: Gradient {
                                 GradientStop { position: 0.5; color: "transparent" }
                                 GradientStop { position: 1.0; color: Theme.backgroundDeepSpace }
@@ -156,15 +143,12 @@ Item {
                         }
                     }
 
-                    // Neon Glow Effect for the current item
                     MultiEffect {
                         anchors.fill: coverRect
                         source: coverRect
                         shadowEnabled: PathView.isCurrentItem
                         shadowColor: Theme.accentCyan
                         shadowBlur: 1.0
-                        shadowHorizontalOffset: 0
-                        shadowVerticalOffset: 0
                     }
 
                     MouseArea {
@@ -174,10 +158,9 @@ Item {
                 }
             }
 
-            // Loading spinner overlay (runs only while isLoading)
             ColumnLayout {
                 anchors.centerIn: parent
-                spacing: 8
+                spacing: Theme.spaceMd
                 visible: MusicViewModel.isLoading
 
                 Item {
@@ -186,30 +169,27 @@ Item {
 
                     Rectangle {
                         anchors.fill: parent
-                        radius: 32
+                        radius: Theme.radiusPill
                         color: "transparent"
                         border.color: Theme.accentCyan
                         border.width: 3
                         opacity: 0.25
                     }
 
-                    Rectangle {
+                    Item {
                         anchors.fill: parent
-                        radius: 32
-                        color: "transparent"
-                        border.color: Theme.accentCyan
-                        border.width: 3
-                        visible: false
-                        id: spinnerArc
-
+                        Rectangle {
+                            width: parent.width / 2
+                            height: parent.height
+                            color: "transparent"
+                            border.color: Theme.accentCyan
+                            border.width: 3
+                            clip: true
+                        }
                         transform: Rotation {
-                            origin.x: 32
-                            origin.y: 32
+                            origin.x: 32; origin.y: 32
                             NumberAnimation on angle {
-                                from: 0
-                                to: 360
-                                duration: 900
-                                loops: Animation.Infinite
+                                from: 0; to: 360; duration: Theme.durationSpin; loops: Animation.Infinite
                                 running: MusicViewModel.isLoading
                             }
                         }
@@ -221,26 +201,21 @@ Item {
                     text: "Loading..."
                     color: Theme.accentCyan
                     font.family: Theme.fontMain
-                    font.pixelSize: 12
+                    font.pixelSize: Theme.textXs
                 }
             }
         }
 
         // Bottom 30%: Navigation Control Panel
-        Rectangle {
+        GlassPanel {
             Layout.fillWidth: true
             Layout.preferredHeight: 140
-            color: "#40151D26" // Translucent dark base
-            border.color: "#802A3B4C" // Subtle border for glass effect
-            border.width: 1
-            radius: 16
 
             Column {
                 anchors.centerIn: parent
                 width: parent.width * 0.85
-                spacing: 6
+                spacing: Theme.spaceSm
 
-                // 1. Track Info (Centered) & Scan Button (Right)
                 Item {
                     width: parent.width
                     height: 48
@@ -251,7 +226,7 @@ Item {
                         Text {
                             text: pathView.currentItem ? pathView.currentItem.songTitle : (MusicViewModel.isScanning ? "Scanning..." : "No Music")
                             font.family: Theme.fontMain
-                            font.pixelSize: 18
+                            font.pixelSize: Theme.textMd
                             font.bold: true
                             color: Theme.textPrimary
                             anchors.horizontalCenter: parent.horizontalCenter
@@ -262,7 +237,7 @@ Item {
                         Text {
                             text: pathView.currentItem ? pathView.currentItem.songArtist : ""
                             font.family: Theme.fontMain
-                            font.pixelSize: 12
+                            font.pixelSize: Theme.textXs
                             color: Theme.textSecondary
                             anchors.horizontalCenter: parent.horizontalCenter
                             width: parent.width - 80
@@ -276,7 +251,7 @@ Item {
                         anchors.verticalCenter: parent.verticalCenter
                         width: 60
                         height: 28
-                        radius: 8
+                        radius: Theme.radiusSm
                         color: MusicViewModel.isScanning ? Theme.accentCyan : "transparent"
                         border.color: Theme.accentCyan
                         border.width: 1
@@ -286,7 +261,7 @@ Item {
                             text: MusicViewModel.isScanning ? "..." : "Scan"
                             color: MusicViewModel.isScanning ? Theme.backgroundDeepSpace : Theme.accentCyan
                             font.family: Theme.fontMain
-                            font.pixelSize: 12
+                            font.pixelSize: Theme.textXs
                         }
 
                         MouseArea {
@@ -297,7 +272,6 @@ Item {
                     }
                 }
 
-                // 2. Scrubber
                 Item {
                     width: parent.width
                     height: 12
@@ -307,7 +281,7 @@ Item {
                         anchors.verticalCenter: parent.verticalCenter
                         width: parent.width
                         height: 3
-                        color: "#40FFFFFF"
+                        color: Theme.trackInactive
                         radius: 1.5
 
                         Rectangle {
@@ -322,9 +296,7 @@ Item {
 
                             Rectangle {
                                 id: thumb
-                                width: 10
-                                height: 10
-                                radius: 5
+                                width: 10; height: 10; radius: 5
                                 color: Theme.textPrimary
                                 anchors.verticalCenter: parent.verticalCenter
                                 anchors.right: parent.right
@@ -343,51 +315,38 @@ Item {
                         id: scrberMouse
                         anchors.fill: parent
                         property real dragX: 0
-                        onPressed: {
-                            root.scrubberDragging = true
-                            dragX = mouseX
-                            MusicViewModel.seek(mouseX / Math.max(1, width))
-                        }
                         onPositionChanged: {
+                            if (pressed) {
+                                dragX = mouseX
+                                MusicViewModel.seek(mouseX / Math.max(1, width))
+                            }
+                        }
+                        onPressed: {
                             dragX = mouseX
                             MusicViewModel.seek(mouseX / Math.max(1, width))
                         }
-                        onReleased: root.scrubberDragging = false
                     }
                 }
 
-                // 3. Volume Slider
                 Row {
                     width: parent.width
                     height: 16
                     anchors.horizontalCenter: parent.horizontalCenter
-                    spacing: 8
+                    spacing: Theme.spaceMd
 
-                    Item {
+                    NeonIcon {
                         width: 16
                         height: 16
                         anchors.verticalCenter: parent.verticalCenter
-
-                        Image {
-                            id: volIcon
-                            anchors.fill: parent
-                            source: "qrc:/qt/qml/com/showcase/resources/icons/volume.svg"
-                            sourceSize: Qt.size(16, 16)
-                            visible: false
-                        }
-                        MultiEffect {
-                            anchors.fill: volIcon
-                            source: volIcon
-                            colorization: 1.0
-                            colorizationColor: Theme.textSecondary
-                        }
+                        source: "qrc:/qt/qml/com/showcase/resources/icons/volume.svg"
+                        colorizationColor: Theme.textSecondary
                     }
 
                     Rectangle {
-                        width: parent.width - 16 - 8
+                        width: parent.width - 16 - Theme.spaceMd
                         anchors.verticalCenter: parent.verticalCenter
                         height: 3
-                        color: "#40FFFFFF"
+                        color: Theme.trackInactive
                         radius: 1.5
 
                         Rectangle {
@@ -399,151 +358,77 @@ Item {
 
                         MouseArea {
                             anchors.fill: parent
+                            onPositionChanged: if (pressed) MusicViewModel.setVolume(mouseX / Math.max(1, width))
                             onPressed: MusicViewModel.setVolume(mouseX / Math.max(1, width))
-                            onPositionChanged: MusicViewModel.setVolume(mouseX / Math.max(1, width))
                         }
                     }
                 }
 
-                // 4. Media Controls
                 Row {
                     anchors.horizontalCenter: parent.horizontalCenter
-                    spacing: 24
+                    spacing: Theme.spaceXl
 
-                    Item {
-                        width: 24
-                        height: 24
+                    NeonIconButton {
+                        width: 24; height: 24
                         anchors.verticalCenter: parent.verticalCenter
-                        opacity: MusicViewModel.shuffleMode ? 1.0 : 0.4
-                        Behavior on opacity { NumberAnimation { duration: Theme.durationFast } }
-                        Image {
-                            id: shuffleIcon
-                            anchors.fill: parent
-                            source: "qrc:/qt/qml/com/showcase/resources/icons/shuffle.svg"
-                            sourceSize: Qt.size(24, 24)
-                            visible: false
-                        }
-                        MultiEffect {
-                            anchors.fill: shuffleIcon
-                            source: shuffleIcon
-                            colorization: 1.0
-                            colorizationColor: MusicViewModel.shuffleMode ? Theme.accentCyan : Theme.textSecondary
-                            Behavior on colorizationColor { ColorAnimation { duration: Theme.durationFast } }
-                        }
-                        MouseArea {
-                            anchors.fill: parent
-                            onClicked: MusicViewModel.toggleShuffle()
-                        }
+                        source: "qrc:/qt/qml/com/showcase/resources/icons/shuffle.svg"
+                        isToggle: true
+                        isActive: MusicViewModel.shuffleMode
+                        colorizationColor: Theme.textSecondary
+                        onClicked: MusicViewModel.toggleShuffle()
                     }
 
-                    Item {
-                        width: 26
-                        height: 26
+                    NeonIconButton {
+                        width: 26; height: 26
                         anchors.verticalCenter: parent.verticalCenter
-                        scale: prevMouse.pressed ? 0.9 : 1.0
-                        Behavior on scale { NumberAnimation { duration: 100 } }
-                        Image {
-                            id: prevIcon
-                            anchors.fill: parent
-                            source: "qrc:/qt/qml/com/showcase/resources/icons/prev.svg"
-                            sourceSize: Qt.size(26, 26)
-                            visible: false
-                        }
-                        MultiEffect {
-                            anchors.fill: prevIcon
-                            source: prevIcon
-                            colorization: 1.0
-                            colorizationColor: prevMouse.pressed ? Theme.accentCyan : Theme.textPrimary
-                            Behavior on colorizationColor { ColorAnimation { duration: 100 } }
-                        }
-                        MouseArea { id: prevMouse; anchors.fill: parent; onClicked: MusicViewModel.prev() }
+                        source: "qrc:/qt/qml/com/showcase/resources/icons/prev.svg"
+                        onClicked: MusicViewModel.prev()
                     }
 
                     Rectangle {
-                        width: 44
-                        height: 44
-                        radius: 22
+                        width: 44; height: 44; radius: Theme.radiusLg
                         anchors.verticalCenter: parent.verticalCenter
                         color: playMouse.pressed ? Theme.accentCyan : "transparent"
                         border.color: Theme.accentCyan
                         border.width: 2
                         scale: playMouse.pressed ? 0.9 : 1.0
-                        Behavior on scale { NumberAnimation { duration: 100 } }
-                        Behavior on color { ColorAnimation { duration: 100 } }
-                        Image {
-                            id: playIcon
-                            width: 20
-                            height: 20
+                        Behavior on scale { NumberAnimation { duration: Theme.durationPress } }
+                        Behavior on color { ColorAnimation { duration: Theme.durationPress } }
+                        
+                        NeonIcon {
+                            width: 20; height: 20
                             anchors.centerIn: parent
                             source: MusicViewModel.isPlaying ? "qrc:/qt/qml/com/showcase/resources/icons/pause.svg" : "qrc:/qt/qml/com/showcase/resources/icons/play.svg"
-                            sourceSize: Qt.size(20, 20)
-                            visible: false
-                        }
-                        MultiEffect {
-                            anchors.fill: playIcon
-                            source: playIcon
-                            colorization: 1.0
                             colorizationColor: playMouse.pressed ? Theme.backgroundDeepSpace : Theme.accentCyan
-                            Behavior on colorizationColor { ColorAnimation { duration: 100 } }
                         }
                         MouseArea { id: playMouse; anchors.fill: parent; onClicked: MusicViewModel.togglePlayPause() }
                     }
 
-                    Item {
-                        width: 26
-                        height: 26
+                    NeonIconButton {
+                        width: 26; height: 26
                         anchors.verticalCenter: parent.verticalCenter
-                        scale: nextMouse.pressed ? 0.9 : 1.0
-                        Behavior on scale { NumberAnimation { duration: 100 } }
-                        Image {
-                            id: nextIcon
-                            anchors.fill: parent
-                            source: "qrc:/qt/qml/com/showcase/resources/icons/next.svg"
-                            sourceSize: Qt.size(26, 26)
-                            visible: false
-                        }
-                        MultiEffect {
-                            anchors.fill: nextIcon
-                            source: nextIcon
-                            colorization: 1.0
-                            colorizationColor: nextMouse.pressed ? Theme.accentCyan : Theme.textPrimary
-                            Behavior on colorizationColor { ColorAnimation { duration: 100 } }
-                        }
-                        MouseArea { id: nextMouse; anchors.fill: parent; onClicked: MusicViewModel.next() }
+                        source: "qrc:/qt/qml/com/showcase/resources/icons/next.svg"
+                        onClicked: MusicViewModel.next()
                     }
 
                     Item {
-                        width: 24
-                        height: 24
+                        width: 24; height: 24
                         anchors.verticalCenter: parent.verticalCenter
-                        opacity: MusicViewModel.repeatMode === MusicEnums.RepeatMode.Off ? 0.4 : 1.0
-                        Behavior on opacity { NumberAnimation { duration: Theme.durationFast } }
-                        Image {
-                            id: repeatIcon
+
+                        NeonIconButton {
                             anchors.fill: parent
                             source: "qrc:/qt/qml/com/showcase/resources/icons/repeat.svg"
-                            sourceSize: Qt.size(24, 24)
-                            visible: false
-                        }
-                        MultiEffect {
-                            anchors.fill: repeatIcon
-                            source: repeatIcon
-                            colorization: 1.0
-                            colorizationColor: MusicViewModel.repeatMode === MusicEnums.RepeatMode.Off
-                                ? Theme.textSecondary
-                                : (MusicViewModel.repeatMode === MusicEnums.RepeatMode.One ? Theme.warningRed : Theme.accentCyan)
-                            Behavior on colorizationColor { ColorAnimation { duration: Theme.durationFast } }
-                        }
-                        MouseArea {
-                            anchors.fill: parent
+                            isToggle: true
+                            isActive: MusicViewModel.repeatMode !== MusicEnums.RepeatMode.Off
+                            colorizationColor: Theme.textSecondary
+                            activeColor: MusicViewModel.repeatMode === MusicEnums.RepeatMode.One ? Theme.warningRed : Theme.accentCyan
                             onClicked: MusicViewModel.cycleRepeat()
                         }
+                        
                         Rectangle {
                             anchors.right: parent.right
                             anchors.bottom: parent.bottom
-                            width: 10
-                            height: 10
-                            radius: 5
+                            width: 10; height: 10; radius: 5
                             color: Theme.warningRed
                             visible: MusicViewModel.repeatMode === MusicEnums.RepeatMode.One
                         }
@@ -553,22 +438,12 @@ Item {
         }
     }
 
-
-    // Error Toast (driven by playbackError signal)
-    Connections {
-        target: MusicViewModel
-        function onPlaybackError(msg) {
-            root.toastMessage = msg
-            root.toastOpacity = 1.0
-            toastHideTimer.restart()
-        }
-    }
-
+    // Declarative Error Toast
     Timer {
         id: toastHideTimer
         interval: 3000
-        repeat: false
-        onTriggered: root.toastOpacity = 0.0
+        running: MusicViewModel.lastError !== ""
+        onTriggered: MusicViewModel.clearError()
     }
 
     Rectangle {
@@ -577,18 +452,18 @@ Item {
         anchors.bottomMargin: 12
         width: Math.min(parent.width - 24, toastText.width + 28)
         height: 34
-        radius: 8
+        radius: Theme.radiusSm
         color: Theme.warningRed
-        opacity: root.toastOpacity
+        opacity: MusicViewModel.lastError !== "" ? 1.0 : 0.0
         Behavior on opacity { NumberAnimation { duration: Theme.durationNormal } }
 
         Text {
             id: toastText
             anchors.centerIn: parent
-            text: root.toastMessage
-            color: "#FFFFFF"
+            text: MusicViewModel.lastError
+            color: Theme.textPrimary
             font.family: Theme.fontMain
-            font.pixelSize: 12
+            font.pixelSize: Theme.textXs
             elide: Text.ElideRight
         }
     }

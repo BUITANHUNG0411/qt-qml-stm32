@@ -27,6 +27,7 @@ class MusicPlayerViewModel : public QAbstractListModel
     Q_PROPERTY(bool isPlaying READ isPlaying NOTIFY isPlayingChanged)
     Q_PROPERTY(float progress READ progress NOTIFY progressChanged)
     Q_PROPERTY(bool isScanning READ isScanning NOTIFY isScanningChanged)
+    Q_PROPERTY(QString lastError READ lastError NOTIFY lastErrorChanged)
 
     // ==== New properties (Music Player Upgrade - Step 1) ====
     Q_PROPERTY(float volume READ volume WRITE setVolume NOTIFY volumeChanged)
@@ -60,6 +61,7 @@ public:
     bool isPlaying() const;
     float progress() const;
     bool isScanning() const;
+    QString lastError() const;
 
     // ==== New getters (Step 1) ====
     float volume() const;
@@ -81,6 +83,7 @@ public slots:
     // ==== New Q_INVOKABLEs / slots (Step 1) ====
     Q_INVOKABLE void seek(float ratio);
     Q_INVOKABLE void seekMs(qint64 ms);
+    Q_INVOKABLE void clearError();
     Q_INVOKABLE void toggleShuffle();
     Q_INVOKABLE void cycleRepeat();
     Q_INVOKABLE void saveResume();
@@ -116,6 +119,7 @@ signals:
     void durationChanged();
     void positionChanged();
     void playbackError(const QString& message);
+    void lastErrorChanged();
 
 private:
     void updatePlaybackState();
@@ -140,6 +144,7 @@ private:
     int m_lastIndex = -1;
     qint64 m_lastPos = 0;
     bool m_resumePending = false;
+    QString m_lastError;
 
     QThread m_scannerThread;
     MusicScanner* m_scanner;

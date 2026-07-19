@@ -1,13 +1,13 @@
 import QtQuick
 import QtQuick.Effects
+import com.showcase
 
 Item {
     id: root
     property alias text: label.text
     property alias font: label.font
-    property alias color: label.color
     property color glowColor: Theme.accentCyan
-    property real glowRadius: 8.0
+    property real glowRadius: Theme.radiusSm
     property real glowSpread: 0.2
 
     implicitWidth: label.implicitWidth
@@ -16,9 +16,9 @@ Item {
     Text {
         id: label
         anchors.centerIn: parent
-        color: Theme.accentCyan
+        color: Theme.textPrimary
         font.family: Theme.fontDisplay
-        font.pixelSize: 24
+        font.pixelSize: Theme.textXl
         font.bold: true
         visible: false // Hidden because MultiEffect will render it
     }

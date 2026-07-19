@@ -131,6 +131,11 @@ bool MusicPlayerViewModel::isScanning() const
     return m_isScanning;
 }
 
+QString MusicPlayerViewModel::lastError() const
+{
+    return m_lastError;
+}
+
 // ==== New getters (Step 1) ====
 float MusicPlayerViewModel::volume() const
 {
@@ -207,6 +212,14 @@ void MusicPlayerViewModel::cycleRepeat()
         default: next = MusicEnums::RepeatMode::Off; break;
     }
     setRepeatMode(next);
+}
+
+void MusicPlayerViewModel::clearError()
+{
+    if (!m_lastError.isEmpty()) {
+        m_lastError.clear();
+        emit lastErrorChanged();
+    }
 }
 
 void MusicPlayerViewModel::seek(float ratio)
@@ -388,6 +401,8 @@ void MusicPlayerViewModel::onMediaStatusChanged(QMediaPlayer::MediaStatus status
 
 void MusicPlayerViewModel::onErrorOccurred(QMediaPlayer::Error /*error*/, const QString &errorString)
 {
+    m_lastError = errorString;
+    emit lastErrorChanged();
     emit playbackError(errorString);
 }
 
