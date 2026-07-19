@@ -38,7 +38,7 @@ Item {
             
             // Replaced absolute x with anchors linked to Theme values
             anchors.left: parent.left
-            anchors.leftMargin: Theme.gaugeInsetLeft - Theme.dashboardMargin - width / 2
+            anchors.leftMargin: Theme.gaugeInsetLeft - width / 2
 
             NeonTickGauge {
                 anchors.centerIn: parent
@@ -104,7 +104,7 @@ Item {
             
             // Replaced absolute x with anchors linked to Theme values
             anchors.left: parent.left
-            anchors.leftMargin: Theme.gaugeInsetRight - Theme.dashboardMargin - width / 2
+            anchors.leftMargin: Theme.gaugeInsetRight - width / 2
 
             NeonTickGauge {
                 anchors.centerIn: parent
