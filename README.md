@@ -61,9 +61,7 @@
 
 Watch the simulator in action (including Neon UI, dynamic gauges, and music player):
 
-[Screencast From 2026-07-20 05-34-46.webm](https://github.com/user-attachments/assets/6a6238db-94a1-43bd-a060-19f87c4b604d)
-
-
+https://github.com/user-attachments/assets/6a6238db-94a1-43bd-a060-19f87c4b604d
 <!-- TODO: screenshot — Main dashboard in Bike form factor -->
 <!-- TODO: screenshot — Serial disconnected state (auto-fallback to Simulator) -->
 
