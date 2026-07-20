@@ -61,9 +61,11 @@
 
 Watch the simulator in action (including Neon UI, dynamic gauges, and music player):
 
-<video src="resources/media/simulator-demo.mp4" controls="controls" muted="muted" width="100%"></video>
+<video src="https://github.com/BUITANHUNG0411/qt-qml-stm32/raw/main/resources/media/simulator-demo.mp4" controls="controls" width="100%"></video>
 
-*👆 Watch the full simulation video in action (Neon UI, dynamic gauges, and music player).*
+*(Nếu video trên không tải được, [nhấn vào đây để xem trực tiếp](https://github.com/BUITANHUNG0411/qt-qml-stm32/blob/main/resources/media/simulator-demo.mp4) hoặc nhấp vào hình bên dưới)*
+
+[![Watch the simulator in action](resources/media/dashboard-preview.png)](https://github.com/BUITANHUNG0411/qt-qml-stm32/blob/main/resources/media/simulator-demo.mp4)
 
 <!-- TODO: screenshot — Main dashboard in Bike form factor -->
 <!-- TODO: screenshot — Serial disconnected state (auto-fallback to Simulator) -->
